@@ -35,7 +35,7 @@
 typedef struct deviceInfoConfig
 {
     std::string manufacturer;                // Mandatory
-    std::array<uint8_t, 3> manufacturerOUI;  // Mandatory (3 bytes)
+    std::string manufacturerOUI;             // Mandatory (3 bytes)
     std::string modelName;                   // Mandatory
     std::string productClass;                // Mandatory
     std::string serialNumber;                // Mandatory

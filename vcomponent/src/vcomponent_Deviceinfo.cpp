@@ -25,6 +25,7 @@
 
 #include "vcomponent_Deviceinfo.h"
 #include "vcomponent_Deviceinfo_parse_config.h"
+#include <regex>
 
 namespace com
 {
@@ -92,13 +93,7 @@ namespace com
                     }
                     else if (propertyKey == android::String16("KEY_MANUFACTURER_OUI"))
                     {
-                        char buf[9]; // 6 hex chars + null
-                        snprintf(buf, sizeof(buf), "%02X%02X%02X",
-                                 gDeviceInfoConfig.manufacturerOUI[0],
-                                 gDeviceInfoConfig.manufacturerOUI[1],
-                                 gDeviceInfoConfig.manufacturerOUI[2]);
-
-                        *_aidl_return = android::String16(buf);
+                        *_aidl_return = android::String16(gDeviceInfoConfig.manufacturerOUI.c_str());
                     }
                     else if (propertyKey == android::String16("KEY_MODELNAME"))
                     {
@@ -171,6 +166,10 @@ namespace com
                         *_aidl_return = SetPropertyResult::ERROR_INVALID_PARAM;
                         return android::binder::Status::fromExceptionCode(android::binder::Status::EX_ILLEGAL_ARGUMENT);
                     }
+
+                    static const std::regex macRegex(
+                        R"(^([0-9A-F]{2}:){5}[0-9A-F]{2}$)"); // Regex for MAC address format XX:XX:XX:XX:XX:XX and uppercase letters
+
                     if (propertyKey == android::String16("KEY_MANUFACTURER"))
                     {
                         gDeviceInfoConfig.manufacturer = android::String8(value).string();
@@ -178,51 +177,17 @@ namespace com
                     }
                     else if (propertyKey == android::String16("KEY_MANUFACTURER_OUI"))
                     {
-                        std::string hexStr = android::String8(value).string(); // String16 -> String8 -> std::string
-                        UT_LOG_DEBUG("[VCOMPONENT_DEVICEINFO] Setting KEY_MANUFACTURER_OUI to %s (len=%zu)", hexStr.c_str(), hexStr.size());
-
-                        // Expect exactly 6 hex characters (3 bytes)
-                        if (hexStr.size() != 6)
-                        {
-                            UT_LOG_ERROR("[VCOMPONENT_DEVICEINFO] Invalid KEY_MANUFACTURER_OUI format, expected 6 hex chars");
-                            *_aidl_return = SetPropertyResult::ERROR_INVALID_PARAM;
-                            UT_LOG_ERROR("HAL returning _aidl_return=%d (enum), expected=%d",
-                                         static_cast<int>(SetPropertyResult::ERROR_INVALID_PARAM),
-                                         static_cast<int>(*_aidl_return));
-                            return android::binder::Status::fromExceptionCode(android::binder::Status::EX_ILLEGAL_ARGUMENT);
-                        }
-
-                        auto hexCharToNibble = [](char c) -> uint8_t
-                        {
-                            if (c >= '0' && c <= '9')
-                                return c - '0';
-                            if (c >= 'A' && c <= 'F')
-                                return c - 'A' + 10;
-                            if (c >= 'a' && c <= 'f')
-                                return c - 'a' + 10;
-                            throw std::invalid_argument("Invalid hex digit");
-                        };
-                        auto hexToByte = [&](char high, char low) -> uint8_t
-                        {
-                            return (hexCharToNibble(high) << 4) | hexCharToNibble(low);
-                        };
-
-                        try
-                        {
-                            gDeviceInfoConfig.manufacturerOUI = {
-                                hexToByte(hexStr[0], hexStr[1]),
-                                hexToByte(hexStr[2], hexStr[3]),
-                                hexToByte(hexStr[4], hexStr[5])};
-                        }
-                        catch (const std::exception &e)
+                        std::string oui = android::String8(value).string();
+                        UT_LOG_INFO("OUI: %s", oui.c_str());
+                        if (oui.size() != 3) // OUI should be 3 bytes (6 hex digits)
                         {
                             *_aidl_return = SetPropertyResult::ERROR_INVALID_PARAM;
-                            UT_LOG_ERROR("[VCOMPONENT_DEVICEINFO] Failed to parse KEY_MANUFACTURER_OUI: %s", e.what());
+                            UT_LOG_ERROR("Invalid OUI: %s", oui.c_str());
                             return android::binder::Status::fromExceptionCode(android::binder::Status::EX_ILLEGAL_ARGUMENT);
                         }
-
+                        gDeviceInfoConfig.manufacturerOUI = oui;
+                        UT_LOG_DEBUG("gDeviceInfoConfig.manufacturerOUI: %s", gDeviceInfoConfig.manufacturerOUI.c_str());
                         *_aidl_return = SetPropertyResult::SUCCESS;
-                        return android::binder::Status::ok();
                     }
                     else if (propertyKey == android::String16("KEY_MODELNAME"))
                     {
@@ -241,27 +206,62 @@ namespace com
                     }
                     else if (propertyKey == android::String16("KEY_WIFIMAC"))
                     {
-                        gDeviceInfoConfig.wifiMac = android::String8(value).string();
+                        std::string mac = android::String8(value).string();
+                        if (!std::regex_match(mac, macRegex))
+                        {
+                            *_aidl_return = SetPropertyResult::ERROR_INVALID_PARAM;
+                            UT_LOG_ERROR("Invalid Wi-Fi MAC: %s", mac.c_str());
+                            return android::binder::Status::fromExceptionCode(android::binder::Status::EX_ILLEGAL_ARGUMENT);
+                        }
+                        gDeviceInfoConfig.wifiMac = mac;
                         *_aidl_return = SetPropertyResult::SUCCESS;
                     }
                     else if (propertyKey == android::String16("KEY_BLUETOOTHMAC"))
                     {
-                        gDeviceInfoConfig.bluetoothMac = android::String8(value).string();
+                        std::string mac = android::String8(value).string();
+                        if (!std::regex_match(mac, macRegex))
+                        {
+                            *_aidl_return = SetPropertyResult::ERROR_INVALID_PARAM;
+                            UT_LOG_ERROR("Invalid Bluetooth MAC: %s", mac.c_str());
+                            return android::binder::Status::fromExceptionCode(android::binder::Status::EX_ILLEGAL_ARGUMENT);
+                        }
+                        gDeviceInfoConfig.bluetoothMac = mac;
                         *_aidl_return = SetPropertyResult::SUCCESS;
                     }
                     else if (propertyKey == android::String16("KEY_WPSPIN"))
                     {
-                        gDeviceInfoConfig.wpsPin = android::String8(value).string();
+                        std::string wpsValue = android::String8(value).string();
+                        if (wpsValue.size() != 8 || !std::all_of(wpsValue.begin(), wpsValue.end(), ::isdigit))
+                        {
+                            *_aidl_return = SetPropertyResult::ERROR_INVALID_PARAM;
+                            UT_LOG_ERROR("Invalid WPS PIN: %s", wpsValue.c_str());
+                            return android::binder::Status::fromExceptionCode(android::binder::Status::EX_ILLEGAL_ARGUMENT);
+                        }
+                        gDeviceInfoConfig.wpsPin = wpsValue;
                         *_aidl_return = SetPropertyResult::SUCCESS;
                     }
                     else if (propertyKey == android::String16("KEY_ETHERNETMAC"))
                     {
-                        gDeviceInfoConfig.ethernetMac = android::String8(value).string();
+                        std::string mac = android::String8(value).string();
+                        if (!std::regex_match(mac, macRegex))
+                        {
+                            *_aidl_return = SetPropertyResult::ERROR_INVALID_PARAM;
+                            UT_LOG_ERROR("Invalid Ethernet MAC: %s", mac.c_str());
+                            return android::binder::Status::fromExceptionCode(android::binder::Status::EX_ILLEGAL_ARGUMENT);
+                        }
+                        gDeviceInfoConfig.ethernetMac = mac;
                         *_aidl_return = SetPropertyResult::SUCCESS;
                     }
                     else if (propertyKey == android::String16("KEY_RF4CEMAC"))
                     {
-                        gDeviceInfoConfig.rf4ceMac = android::String8(value).string();
+                        std::string mac = android::String8(value).string();
+                        if (!std::regex_match(mac, macRegex))
+                        {
+                            *_aidl_return = SetPropertyResult::ERROR_INVALID_PARAM;
+                            UT_LOG_ERROR("Invalid RF4CE MAC: %s", mac.c_str());
+                            return android::binder::Status::fromExceptionCode(android::binder::Status::EX_ILLEGAL_ARGUMENT);
+                        }
+                        gDeviceInfoConfig.rf4ceMac = mac;
                         *_aidl_return = SetPropertyResult::SUCCESS;
                     }
                     else if (propertyKey == android::String16("KEY_IMAGENAME"))

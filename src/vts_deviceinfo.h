@@ -113,6 +113,7 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
         UT_ASSERT_TRUE(status.isOk()); \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_NONE); \
         UT_LOG_DEBUG("Property Value: %s", android::String8(value.value()).string()); \
+        value = std::nullopt; \
     } while (0)
 
 // Macro for setProperty - positive case
@@ -134,9 +135,10 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
         ::android::binder::Status status; \
         UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", android::String8(key).string()); \
         status = (deviceinfoHandle)->getProperty(key, &value); \
-        UT_LOG_DEBUG("Result getProperty(OUT:value), status:[exception:%d]", status.exceptionCode()); \
+        UT_LOG_DEBUG("Result getProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
         UT_ASSERT_FALSE(status.isOk()); \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_ILLEGAL_ARGUMENT); \
+        UT_ASSERT_FALSE(value.has_value()); \
     } while (0)
 
 // Macro for setProperty - negative case
@@ -144,8 +146,9 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
     do                                                                                                         \
     {                                                                                                          \
         ::android::binder::Status status;                                                                      \
+        UT_LOG_DEBUG("Calling setProperty(IN:key[%s], IN:val[%s], OUT:result[])", android::String8(key).string(), android::String8(val).string()); \
         status = (deviceinfoHandle)->setProperty(key, val, &result);                                           \
-        UT_LOG_DEBUG("Result setProperty(OUT:%d), status:[exception:%d]", result, status.exceptionCode()); \
+        UT_LOG_DEBUG("Result setProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
         UT_ASSERT_FALSE(status.isOk());                                                                        \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_ILLEGAL_ARGUMENT);               \
         UT_ASSERT_EQUAL(result, SetPropertyResult::ERROR_INVALID_PARAM);                                   \
