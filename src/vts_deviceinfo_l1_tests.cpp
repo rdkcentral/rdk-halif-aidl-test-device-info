@@ -98,37 +98,98 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getAndSet_pos)
     UT_ASSERT_EQUAL(version.minor, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.minor"));
     UT_ASSERT_EQUAL(version.doc, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.doc"));
     com::rdk::hal::deviceinfo::SetPropertyResult result;
+    std::optional<::android::String16> value;
     android::String16 key("KEY_MANUFACTURER");
     android::String16 val("dummy_value");
     DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
-    std::optional<::android::String16> value;
     DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    // Additional assertions can be added here to validate the contents of 'caps'
-    UT_LOG_DEBUG("Capabilities retrieved: /*...print relevant fields...*/");
+    key = android::String16("KEY_MANUFACTURER_OUI");
+    val = android::String16("A1B"); // Valid OUI (3 bytes)
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_MODELNAME");
+    val = android::String16("Model_XYZ");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_PRODUCTCLASS");
+    val = android::String16("Product_123");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_SERIALNUMBER");
+    val = android::String16("SN123456789");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_WIFIMAC");
+    val = android::String16("00:11:22:33:44:55");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_BLUETOOTHMAC");
+    val = android::String16("66:77:88:99:AA:BB");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_WPSPIN");
+    val = android::String16("12345670"); // Valid 8-digit PIN
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_ETHERNETMAC");
+    val = android::String16("CC:DD:EE:FF:00:11");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_RF4CEMAC");
+    val = android::String16("22:33:44:55:66:77");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_IMAGENAME");
+    val = android::String16("Image_1.0");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_IMAGETYPE");
+    val = android::String16("Type_A");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_COUNTRYCODE");
+    val = android::String16("US");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_LANGUAGECODE");
+    val = android::String16("EN");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_MANUFACTURERDATA");
+    val = android::String16("Some manufacturer data");
+    DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
     return;
 }
 
 UT_ADD_TEST(VTS_L1_DEVICEINFO, getAndSet_neg)
 {
     android::String16 key("KEY_MANUFACTURER_OUI");
-    android::String16 val("ABCDABCD"); // Invalid OUI (should be 6 hex digits)
-    com::rdk::hal::deviceinfo::SetPropertyResult result;
+    android::String16 val("ABCDAB"); // Invalid OUI (should be 3 bytes)
+    com::rdk::hal::deviceinfo::SetPropertyResult result = com::rdk::hal::deviceinfo::SetPropertyResult::ERROR_INVALID_PARAM;
 
     DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
+    key = android::String16("KEY_WPSPIN");
+    val = android::String16("1234"); // Invalid PIN (should be 8 digits)
+    DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
+    key = android::String16("KEY_WIFIMAC");
+    val = android::String16("00:11:22:33:44"); // Invalid MAC (should be 6 bytes)
+    DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
+    key = android::String16("KEY_BLUETOOTHMAC");
+    val = android::String16("GG:77:88:99:AA:BB"); // Invalid MAC (contains 'G')
+    DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
+    key = android::String16("KEY_ETHERNETMAC");
+    val = android::String16("CC:DD:EE:FF:00"); // Invalid MAC (should be 6 bytes)
+    DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
+    key = android::String16("KEY_RF4CEMAC");
+    val = android::String16("22:33:44:55:66"); // Invalid MAC (should be 6 bytes)
+    DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
+    key = android::String16("INVALID_KEY");
+    val = android::String16("SomeValue");
+    DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
 
-    // key = android::String16("INVALID_KEY");
-    // val = android::String16("dummy_value");
-    // DEVICEINFO_GET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val);
-
-    // key = android::String16("XYZ_INVALID_KEY");
-    // val = android::String16("dummy_value");
-    // DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
-
-    // val = android::String16("A_VERY_LONG_VALUE_EXCEEDING_EXPECTED_LENGTH_ABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890");
-    // DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
-
-    // std::optional<::android::String16> value;
-    // DEVICEINFO_GET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, value);
+    std::optional<::android::String16> value;
+    DEVICEINFO_GET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, value);
     return;
 }
 
