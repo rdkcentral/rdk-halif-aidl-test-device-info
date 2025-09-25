@@ -52,9 +52,11 @@ If user chose to run the test in interactive mode, then the test case has to be 
 
 **Test Procedure :**
 
-| Variation / Steps | Description | Test Data | Expected Result | Notes |
-| -- | --------- | ---------- | -------------- | ----- |
-
+| Variation / Steps     | Description                          | Test Data                                  | Expected Result                               | Notes                          |
+|-----------------------|--------------------------------------|--------------------------------------------|-----------------------------------------------|--------------------------------|
+| 1. Initialization     | Obtain IDeviceInfo handle            | gDEVICEINFOHandle                           | Handle is not nullptr                          | Ensure HAL is initialized      |
+| 2. Get Capabilities   | Call getCapabilities on IDeviceInfo  | deviceInfo->getCapabilities(caps)           | Function returns successfully                  | -                              |
+| 3. Validate Properties| Check supportedProperties size       | caps.supportedProperties.size()             | Matches UT_KVP_PROFILE_GET_LIST_COUNT          | Validates property count       |
 ### Test 2
 
 | Title | Details |
