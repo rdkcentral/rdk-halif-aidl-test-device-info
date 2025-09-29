@@ -35,9 +35,9 @@ The following functions are planned as part of L2 testing.
 
 | Title | Details |
 | -- | -- |
-| Function Name | `test_l2_Deviceinfo_getCapabilities` |
+| Function Name | `test_getCapabilities` |
 | Description | Read supported capabilities using getCapabilities function. |
-| Test Group | Module : 02 |
+| Test Group | 02 |
 | Test Case ID | 001 |
 | Priority | High |
 
@@ -62,9 +62,9 @@ If user chose to run the test in interactive mode, then the test case has to be 
 
 | Title | Details |
 | -- | -- |
-| Function Name | `test_l2_Deviceinfo_getHALVersion` |
+| Function Name | `test_getHALVersion` |
 | Description | Read HAL version using getHALVersion function.|
-| Test Group | Module : 02 |
+| Test Group | 02 |
 | Test Case ID | 002 |
 | Priority | High |
 
@@ -91,9 +91,9 @@ If user chose to run the test in interactive mode, then the test case has to be 
 
 | Title | Details |
 | -- | -- |
-| Function Name | `test_l2_Deviceinfo_verifyCapabilities` |
+| Function Name | `test_verifyCapabilities` |
 | Description | Read supported Deviceinfos using getCapabilities function. /n Loop through supported capabilities /n set and get each of the capabilities supported by platform |
-| Test Group | Module : 02 |
+| Test Group | 02 |
 | Test Case ID | 003 |
 | Priority | High |
 
