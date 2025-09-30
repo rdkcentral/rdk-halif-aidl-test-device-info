@@ -104,7 +104,7 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getAndSet_pos)
     DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
     DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
     key = android::String16("KEY_MANUFACTURER_OUI");
-    val = android::String16("A1B"); // Valid OUI (3 bytes)
+    val = android::String16("A1B2C3"); // Valid OUI (3 bytes)
     DEVICEINFO_SET_PROPERTY(gDEVICEINFOHandle, key, val, result);
     DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
     key = android::String16("KEY_MODELNAME");
@@ -165,10 +165,13 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getAndSet_pos)
 UT_ADD_TEST(VTS_L1_DEVICEINFO, getAndSet_neg)
 {
     android::String16 key("KEY_MANUFACTURER_OUI");
-    android::String16 val("ABCDAB"); // Invalid OUI (should be 3 bytes)
+    android::String16 val("ABCDABABC"); // Invalid OUI (should be of length 6)
     com::rdk::hal::deviceinfo::SetPropertyResult result = com::rdk::hal::deviceinfo::SetPropertyResult::ERROR_INVALID_PARAM;
-
     DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
+
+    val = android::String16("A1GBCD"); // Invalid OUI (contains 'G')
+    DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);
+
     key = android::String16("KEY_WPSPIN");
     val = android::String16("1234"); // Invalid PIN (should be 8 digits)
     DEVICEINFO_SET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, val, result);

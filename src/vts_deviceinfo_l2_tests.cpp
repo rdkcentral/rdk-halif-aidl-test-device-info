@@ -99,13 +99,30 @@ public:
  * Refer to Deviceinfo specification documentation [deviceinfo_L2_Low-Level_TestSpecification](../docs/pages/)
  */
 
-UT_ADD_TEST(VTS_L2_DEVICEINFO, test_l2_Deviceinfo_getCapabilities)
+UT_ADD_TEST(VTS_L2_DEVICEINFO, test_getCapabilities)
 {
     android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
     UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
     com::rdk::hal::deviceinfo::Capabilities caps;
     deviceInfo->getCapabilities(&caps);
+    char returnedString[UT_KVP_MAX_ELEMENT_SIZE];
     UT_ASSERT_EQUAL(caps.supportedProperties.size(), UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties"));
+    for (const auto &property : caps.supportedProperties)
+    {
+        UT_LOG_DEBUG("Supported Property: %s", android::internal::ToString(property).c_str());
+        bool found = false;
+        for (int i = 0; i < UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties"); i++)
+        {
+            std::string key = "IDeviceInfo.supportedProperties." + std::to_string(i);
+            UT_KVP_PROFILE_GET_STRING(key.c_str(), returnedString);
+            if (property == android::String16(returnedString))
+            {
+                found = true;
+                break;
+            }
+        }
+        UT_ASSERT_TRUE(found);
+    }
 }
 
 /**
@@ -120,16 +137,16 @@ UT_ADD_TEST(VTS_L2_DEVICEINFO, test_l2_Deviceinfo_getCapabilities)
  * **Test Procedure:**
  * Refer to Deviceinfo specification documentation [deviceinfo_L2_Low-Level_TestSpecification](../docs/pages/)
  */
-UT_ADD_TEST(VTS_L2_DEVICEINFO, test_l2_Deviceinfo_getHALVersion)
+UT_ADD_TEST(VTS_L2_DEVICEINFO, test_getHALVersion)
 {
     android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
     UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
     com::rdk::hal::deviceinfo::HALVersion halVersion;
     deviceInfo->getHALVersion(&halVersion);
-    UT_LOG_DEBUG("HAL Version: Major=%d, Minor=%d", halVersion.major, halVersion.minor);
-    UT_ASSERT_EQUAL(halVersion.major, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.halVersion.major"));
-    UT_ASSERT_EQUAL(halVersion.minor, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.halVersion.minor"));
-    UT_ASSERT_EQUAL(halVersion.doc, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.halVersion.doc"));
+    UT_LOG_DEBUG("HAL Version: Major=%d, Minor=%d, Doc=%d", halVersion.major, halVersion.minor, halVersion.doc);
+    UT_ASSERT_EQUAL(halVersion.major, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.major"));
+    UT_ASSERT_EQUAL(halVersion.minor, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.minor"));
+    UT_ASSERT_EQUAL(halVersion.doc, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.doc"));
 }
 
 /**
@@ -144,7 +161,7 @@ UT_ADD_TEST(VTS_L2_DEVICEINFO, test_l2_Deviceinfo_getHALVersion)
  * **Test Procedure:**
  * Refer to Deviceinfo specification documentation [deviceinfo_L2_Low-Level_TestSpecification](../docs/pages/)
  */
-UT_ADD_TEST(VTS_L2_DEVICEINFO, test_l2_Deviceinfo_verifyCapabilities)
+UT_ADD_TEST(VTS_L2_DEVICEINFO, test_verifyCapabilities)
 {
     android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
     UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
@@ -158,12 +175,12 @@ UT_ADD_TEST(VTS_L2_DEVICEINFO, test_l2_Deviceinfo_verifyCapabilities)
         UT_LOG_DEBUG("Supported Property: %s", android::internal::ToString(property).c_str());
 
         if (property == android::String16("KEY_MANUFACTURER_OUI")) {
-            deviceInfo->setProperty(property, android::String16("A1B"), &result); // Valid OUI (3 bytes)
+            deviceInfo->setProperty(property, android::String16("ABCDEF"), &result); // Valid OUI (3 bytes)
             UT_ASSERT_EQUAL(result, com::rdk::hal::deviceinfo::SetPropertyResult::SUCCESS);
             result = com::rdk::hal::deviceinfo::SetPropertyResult::ERROR_INVALID_PARAM;
             deviceInfo->getProperty(property, &value);
             UT_ASSERT_TRUE(value.has_value());
-            UT_ASSERT_EQUAL(value.value(), android::String16("A1B"));
+            UT_ASSERT_EQUAL(value.value(), android::String16("ABCDEF"));
         } else if (property == android::String16("KEY_WPSPIN")) {
             deviceInfo->setProperty(property, android::String16("12345670"), &result); // Valid 8-digit PIN
             UT_ASSERT_EQUAL(result, com::rdk::hal::deviceinfo::SetPropertyResult::SUCCESS);

@@ -145,10 +145,10 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
 #define DEVICEINFO_SET_PROPERTY_NEGATIVE(deviceinfoHandle, key, val, result)                                   \
     do                                                                                                         \
     {                                                                                                          \
-        ::android::binder::Status status;                                                                      \
+        ::android::binder::Status status;                                                    \
         UT_LOG_DEBUG("Calling setProperty(IN:key[%s], IN:val[%s], OUT:result[])", android::String8(key).string(), android::String8(val).string()); \
         status = (deviceinfoHandle)->setProperty(key, val, &result);                                           \
-        UT_LOG_DEBUG("Result setProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
+        UT_LOG_DEBUG("Result setProperty(OUT:value), status:[isok:%d, exception:%d, result:%d]", status.isOk(), status.exceptionCode(), result); \
         UT_ASSERT_FALSE(status.isOk());                                                                        \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_ILLEGAL_ARGUMENT);               \
         UT_ASSERT_EQUAL(result, SetPropertyResult::ERROR_INVALID_PARAM);                                   \
