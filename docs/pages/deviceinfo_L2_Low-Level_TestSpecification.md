@@ -52,11 +52,12 @@ If user chose to run the test in interactive mode, then the test case has to be 
 
 **Test Procedure :**
 
-| Variation / Steps     | Description                          | Test Data                                  | Expected Result                               | Notes                          |
-|-----------------------|--------------------------------------|--------------------------------------------|-----------------------------------------------|--------------------------------|
-| 1. Initialization     | Obtain IDeviceInfo handle            | gDEVICEINFOHandle                           | Handle is not nullptr                          | Ensure HAL is initialized      |
-| 2. Get Capabilities   | Call getCapabilities on IDeviceInfo  | deviceInfo->getCapabilities(caps)           | Function returns successfully                  | -                              |
-| 3. Validate Properties| Check supportedProperties size       | caps.supportedProperties.size()             | Matches UT_KVP_PROFILE_GET_LIST_COUNT          | Validates property count       |
+| Step | Action | Input / Test Data | Expected Result | Notes |
+|------|---------|-------------------|-----------------|-------|
+| 1 | Obtain `IDeviceInfo` handle | N/A | Valid handle acquired | Ensure `gDEVICEINFOHandle`/HAL is initialized |
+| 2 | Call `getCapabilities()` | N/A | Capabilities structure is populated | - |
+| 3 | Verify `supportedProperties` count against profile | HAL data | Count matches `UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties")` from HFP file | - |
+| 4 | Validate each property against profile | HAL data | Each property exists in HFP list and matches expected value | Use `UT_KVP_PROFILE_GET_STRING` for comparison.<br><br>**Properties to verify:**<br>- `KEY_MANUFACTURER`<br>- `KEY_MANUFACTURER_OUI`<br>- `KEY_MODELNAME`<br>- `KEY_PRODUCTCLASS`<br>- `KEY_SERIALNUMBER`<br>- `KEY_WIFIMAC`<br>- `KEY_BLUETOOTHMAC`<br>- `KEY_WPSPIN`<br>- `KEY_ETHERNETMAC`<br>- `KEY_RF4CEMAC`<br>- `KEY_IMAGENAME`<br>- `KEY_IMAGETYPE`<br>- `KEY_COUNTRYCODE`<br>- `KEY_LANGUAGECODE`<br>- `KEY_MANUFACTURERDATA` |
 
 ### Test 2
 
@@ -81,11 +82,11 @@ If user chose to run the test in interactive mode, then the test case has to be 
 
 | Variation / Steps | Description | Test Data | Expected Result | Notes |
 |-------------------|-------------|-----------|----------------|-------|
-| 1 | Obtain IDeviceInfo handle | N/A | Valid handle acquired | Ensure gDEVICEINFOHandle is initialized |
-| 2 | Call getHALVersion() | N/A | Function executes without error |  |
-| 3 | Verify major version | Read halVersion.major | Matches UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.halVersion.major") |  |
-| 4 | Verify minor version | Read halVersion.minor | Matches UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.halVersion.minor") |  |
-| 5 | Verify doc version | Read halVersion.doc | Matches UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.halVersion.doc") |  |
+| 1 | Obtain IDeviceInfo handle | N/A | Valid handle acquired | Ensure `gDEVICEINFOHandle`/HAL is initialized |
+| 2 | Call `getHALVersion()` | N/A | Function executes without error |  |
+| 3 | Verify major version | Read halVersion.major | Matches `UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.major")` |  |
+| 4 | Verify minor version | Read halVersion.minor | Matches `UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.minor")` |  |
+| 5 | Verify doc version | Read halVersion.doc | Matches `UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.doc")` |  |
 
 ### Test 3
 
@@ -108,11 +109,10 @@ If user chose to run the test in interactive mode, then the test case has to be 
 
 **Test Procedure :**
 
-| Variation / Steps | Description | Test Data | Expected Result | Notes |
- |-------------------|-------------|-----------|----------------|-------|
-| 1 | Obtain IDeviceInfo handle | N/A | Valid handle acquired | Ensure gDEVICEINFOHandle is initialized |
-| 2 | Call getCapabilities() to get supported properties | N/A | Function executes without error |  |
-| 3 | For each supported property, perform the following: | N/A | N/A |  |
-| 3.1 | Call setProperty() with a valid value | Property key and valid value | Function executes without error | Valid values depend on property type |
-| 3.2 | Call getProperty() to retrieve the value | Property key | Retrieved value matches set value |  | |
-| 4 | Log results and any discrepancies | N/A | All properties set and retrieved successfully | |  |
+| Step | Action | Input / Test Data | Expected Result | Notes |
+|------|--------|------------------|-----------------|-------|
+| 1 | Obtain IDeviceInfo handle | N/A | Valid handle acquired | Precondition for all steps |
+| 2 | Retrieve supported properties via `getCapabilities()` | N/A | List of supported properties | Used for iteration |
+| 3 | For each property, call `setProperty()` with valid test value | `KEY_MANUFACTURER_OUI: "ABCDEF"` (hex string 3 bytes) <br>`KEY_WPSPIN: "12345670"` (8-digit PIN) <br>`KEY_WIFIMAC / KEY_BLUETOOTHMAC / KEY_ETHERNETMAC / KEY_RF4CEMAC: "00:11:22:33:44:55"` (MAC address) <br>`KEY_MANUFACTURER / KEY_MODELNAME / KEY_PRODUCTCLASS / KEY_SERIALNUMBER / KEY_IMAGENAME / KEY_IMAGETYPE / KEY_COUNTRYCODE / KEY_LANGUAGECODE / KEY_MANUFACTURERDATA: "TestValue"`| SetPropertyResult::SUCCESS | Value depends on property type |
+ | 4 | For each property, call `getProperty()` | Property name | Value matches set value | Verifies correct storage/retrieval |
+ | 5 | Log results and assert correctness | N/A | All assertions pass | |
