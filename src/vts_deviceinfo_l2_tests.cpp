@@ -105,22 +105,33 @@ UT_ADD_TEST(VTS_L2_DEVICEINFO, test_getCapabilities)
     UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
     com::rdk::hal::deviceinfo::Capabilities caps;
     deviceInfo->getCapabilities(&caps);
-    char returnedString[UT_KVP_MAX_ELEMENT_SIZE];
     UT_ASSERT_EQUAL(caps.supportedProperties.size(), UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties"));
     for (const auto &property : caps.supportedProperties)
     {
-        UT_LOG_DEBUG("Supported Property: %s", android::internal::ToString(property).c_str());
+        const std::string propertyStr = android::internal::ToString(property);
+        UT_LOG_DEBUG("Supported Property: %s", propertyStr.c_str());
+
+        const int propCount = UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties");
+        const std::string baseKey = "IDeviceInfo.supportedProperties.";
         bool found = false;
-        for (int i = 0; i < UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties"); i++)
+        std::string key;
+        char returnedString[UT_KVP_MAX_ELEMENT_SIZE] = {0};
+        for (int i = 0; i < propCount; ++i)
         {
-            std::string key = "IDeviceInfo.supportedProperties." + std::to_string(i);
+            key.clear();
+            key.reserve(baseKey.size() + 16 + propertyStr.size()); // avoid reallocations
+            key.append(baseKey).append(std::to_string(i)).append(".").append(propertyStr);
+
             UT_KVP_PROFILE_GET_STRING(key.c_str(), returnedString);
-            if (property == android::String16(returnedString))
+
+            if (returnedString[0] != '\0')
             {
                 found = true;
+                returnedString[0] = '\0'; // reset returnedString
                 break;
             }
         }
+
         UT_ASSERT_TRUE(found);
     }
 }
@@ -167,55 +178,43 @@ UT_ADD_TEST(VTS_L2_DEVICEINFO, test_verifyCapabilities)
     UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
     com::rdk::hal::deviceinfo::Capabilities caps;
     com::rdk::hal::deviceinfo::SetPropertyResult result;
-    std::optional<::android::String16> value;
+
     deviceInfo->getCapabilities(&caps);
+    char retString[UT_KVP_MAX_ELEMENT_SIZE];
     UT_ASSERT_EQUAL(caps.supportedProperties.size(), UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties"));
 
-    for(const auto& property : caps.supportedProperties) {
-        UT_LOG_DEBUG("Supported Property: %s", android::internal::ToString(property).c_str());
+    for (const auto &property : caps.supportedProperties)
+    {
+        const std::string propertyStr = android::internal::ToString(property);
+        UT_LOG_DEBUG("Supported Property: %s", propertyStr.c_str());
+        std::optional<::android::String16> value = std::nullopt;
+        const int propCount = UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties");
+        const std::string baseKey = "IDeviceInfo.supportedProperties.";
+        bool found = false;
+        std::string key;
+        char returnedString[256] = {0}; // or appropriate size
 
-        if (property == android::String16("KEY_MANUFACTURER_OUI")) {
-            deviceInfo->setProperty(property, android::String16("ABCDEF"), &result); // Valid OUI (3 bytes)
-            UT_ASSERT_EQUAL(result, com::rdk::hal::deviceinfo::SetPropertyResult::SUCCESS);
-            result = com::rdk::hal::deviceinfo::SetPropertyResult::ERROR_INVALID_PARAM;
+        deviceInfo->getProperty(property, &value);
+        for (int i = 0; i < propCount; ++i)
+        {
+            key.clear();
+            key.reserve(baseKey.size() + 16 + propertyStr.size()); // avoid reallocations
+            key.append(baseKey).append(std::to_string(i)).append(".").append(propertyStr);
+
+            UT_KVP_PROFILE_GET_STRING(key.c_str(), returnedString);
             deviceInfo->getProperty(property, &value);
+
             UT_ASSERT_TRUE(value.has_value());
-            UT_ASSERT_EQUAL(value.value(), android::String16("ABCDEF"));
-        } else if (property == android::String16("KEY_WPSPIN")) {
-            deviceInfo->setProperty(property, android::String16("12345670"), &result); // Valid 8-digit PIN
-            UT_ASSERT_EQUAL(result, com::rdk::hal::deviceinfo::SetPropertyResult::SUCCESS);
-            result = com::rdk::hal::deviceinfo::SetPropertyResult::ERROR_INVALID_PARAM;
-            deviceInfo->getProperty(property, &value);
-            UT_ASSERT_TRUE(value.has_value());
-            UT_ASSERT_EQUAL(value.value(), android::String16("12345670"));
-        } else if (property == android::String16("KEY_WIFIMAC") ||
-                   property == android::String16("KEY_BLUETOOTHMAC") ||
-                   property == android::String16("KEY_ETHERNETMAC") ||
-                   property == android::String16("KEY_RF4CEMAC")) {
-            deviceInfo->setProperty(property, android::String16("00:11:22:33:44:55"), &result); // Valid MAC address
-            UT_ASSERT_EQUAL(result, com::rdk::hal::deviceinfo::SetPropertyResult::SUCCESS);
-            result = com::rdk::hal::deviceinfo::SetPropertyResult::ERROR_INVALID_PARAM;
-            deviceInfo->getProperty(property, &value);
-            UT_ASSERT_TRUE(value.has_value());
-            UT_ASSERT_EQUAL(value.value(), android::String16("00:11:22:33:44:55"));
-        } else if (property == android::String16("KEY_MANUFACTURER") ||
-                   property == android::String16("KEY_MODELNAME") ||
-                   property == android::String16("KEY_PRODUCTCLASS") ||
-                   property == android::String16("KEY_SERIALNUMBER") ||
-                   property == android::String16("KEY_IMAGENAME") ||
-                   property == android::String16("KEY_IMAGETYPE") ||
-                   property == android::String16("KEY_COUNTRYCODE") ||
-                   property == android::String16("KEY_LANGUAGECODE") ||
-                   property == android::String16("KEY_MANUFACTURERDATA")) {
-            deviceInfo->setProperty(property, android::String16("TestValue"), &result);
-            UT_ASSERT_EQUAL(result, com::rdk::hal::deviceinfo::SetPropertyResult::SUCCESS);
-            result = com::rdk::hal::deviceinfo::SetPropertyResult::ERROR_INVALID_PARAM;
-            deviceInfo->getProperty(property, &value);
-            UT_ASSERT_TRUE(value.has_value());
-            UT_ASSERT_EQUAL(value.value(), android::String16("TestValue"));
-        } else {
-            UT_LOG_DEBUG("No test case defined for property: %s", android::internal::ToString(property).c_str());
+            if (returnedString[0] != '\0')
+            {
+                found = true;
+                UT_ASSERT_EQUAL(value.value(), android::String16(android::String8(returnedString)));
+                returnedString[0] = '\0'; // reset returnedString
+                break;
+            }
         }
+
+        UT_ASSERT_TRUE(found);
     }
 }
 

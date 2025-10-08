@@ -233,6 +233,7 @@ install_test()
 
     cp -r ${PROFILES_DIR} ${INSTALL_PATH}
     cp -r "${TOP}/vcomponent/vcomponent_configurations" ${INSTALL_PATH}
+    cp -r "${TOP}/vcomponent/deviceInfo_populate_controlPlane.sh" ${INSTALL_PATH}
 }
 
 ###############################################################################
