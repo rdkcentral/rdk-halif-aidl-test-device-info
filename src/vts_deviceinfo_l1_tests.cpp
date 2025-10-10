@@ -130,6 +130,10 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, testGet_pos)
     DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
     key = android::String16("KEY_MANUFACTURERDATA");
     DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_DEVICE_TYPE");
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
+    key = android::String16("KEY_CHIPSETID");
+    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
     return;
 }
 

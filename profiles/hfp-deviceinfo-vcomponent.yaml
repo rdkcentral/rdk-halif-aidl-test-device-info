@@ -22,3 +22,5 @@ IDeviceInfo:                 # Component object begins
         - KEY_COUNTRYCODE: "US"
         - KEY_LANGUAGECODE: "en"
         - KEY_MANUFACTURERDATA: "Test data block for validation - 0xDEADBEEF"
+        - KEY_DEVICE_TYPE : "STB"
+        - KEY_CHIPSETID : "CHIPSET1234567890"
