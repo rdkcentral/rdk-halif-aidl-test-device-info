@@ -22,6 +22,7 @@
 RUN_DIR=$(realpath "$(dirname "$0")")
 VCOMPONENT_SERVICE_NAME=VComponentDeviceinfoService
 VCOMPONENT_CONFIG_PATH=${RUN_DIR}/vcomponent_configurations/deviceinfo_vcomponent_configuration.yaml
+VCOMPONENT_PORT=8075
 # Function to check if a process is running
 check_process()
 {
@@ -59,7 +60,7 @@ start_vcomponent_service()
     if [ -z "$user_config" ]; then
         user_config="$VCOMPONENT_CONFIG_PATH"
     fi
-    ${RUN_DIR}/$VCOMPONENT_SERVICE_NAME -c "$user_config" &
+    ${RUN_DIR}/$VCOMPONENT_SERVICE_NAME -c "$user_config" -p "${VCOMPONENT_PORT}" &
     vcomponentservice_pid=$!
     # Wait for service to be ready
     sleep 1
