@@ -60,11 +60,13 @@
  *
  */
 
-#include "vts_deviceinfo.h"
-#include "com/rdk/hal/deviceinfo/IDeviceInfo.h"
-#include "ut_log.h"
 
-extern sp<IDeviceInfo> gDEVICEINFOHandle;
+#include <ut_log.h>
+#include <ut_kvp_profile.h>
+
+#include "vts_deviceinfo.h"
+
+extern android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> gDEVICEINFOHandle;
 
 /* Test class registration with UT_Core */
 UT_ADD_TEST_TO_GROUP(VTS_L1_DEVICEINFO, UT_TESTS_L1)
@@ -78,7 +80,7 @@ public:
 
     void SetUp() override
     {
-        // android::ProcessState::self()->startThreadPool();
+        android::ProcessState::self()->startThreadPool();
     }
 
     void TearDown() override
@@ -86,63 +88,159 @@ public:
     }
 };
 
-// Test case for getCapabilities, getHALVersion, getProperty positive scenarios
-UT_ADD_TEST(VTS_L1_DEVICEINFO, testGet_pos)
+/**
+ * @brief Test for getCapabilities() function of IDeviceInfo
+ *
+ * This test verifies that the getCapabilities() method of the IDeviceInfo interface
+ * correctly populates the Capabilities structure with the supported properties.
+ *
+ * **Test Group ID:** 02@n
+ * **Test Case ID:** 001@n
+ *
+ * **Test Procedure:**
+ * Refer to Deviceinfo specification documentation [deviceinfo_L1_Low-Level_TestSpecification](../docs/pages/)
+ */
+
+UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getCapabilities)
 {
+    android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
+    UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
     com::rdk::hal::deviceinfo::Capabilities caps;
-    DEVICEINFO_GET_CAPABILITIES(gDEVICEINFOHandle, caps); //getCapabilities()
+    DEVICEINFO_GET_CAPABILITIES(deviceInfo, caps);
+
     UT_ASSERT_EQUAL(caps.supportedProperties.size(), UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties"));
-    com::rdk::hal::deviceinfo::HALVersion version;
-    DEVICEINFO_GET_HALVERSION(gDEVICEINFOHandle, version); //getHALVersion
-    UT_ASSERT_EQUAL(version.major, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.major"));
-    UT_ASSERT_EQUAL(version.minor, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.minor"));
-    UT_ASSERT_EQUAL(version.doc, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.doc"));
-    com::rdk::hal::deviceinfo::SetPropertyResult result;
-    std::optional<::android::String16> value;
-    android::String16 key("KEY_MANUFACTURER");
-    android::String16 val;
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value); //getProperty
-    key = android::String16("KEY_MANUFACTURER_OUI");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_MODELNAME");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_PRODUCTCLASS");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_SERIALNUMBER");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_WIFIMAC");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_BLUETOOTHMAC");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_WPSPIN");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_ETHERNETMAC");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_RF4CEMAC");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_IMAGENAME");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_IMAGETYPE");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_COUNTRYCODE");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_LANGUAGECODE");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_MANUFACTURERDATA");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_DEVICE_TYPE");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    key = android::String16("KEY_CHIPSETID");
-    DEVICEINFO_GET_PROPERTY(gDEVICEINFOHandle, key, value);
-    return;
+    for (const auto &property : caps.supportedProperties)
+    {
+        const std::string propertyStr = android::internal::ToString(property);
+        UT_LOG_DEBUG("Supported Property: %s", propertyStr.c_str());
+
+        const int propCount = UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties");
+        const std::string baseKey = "IDeviceInfo.supportedProperties.";
+        bool found = false;
+        std::string key;
+        char returnedString[UT_KVP_MAX_ELEMENT_SIZE] = {0};
+        for (int i = 0; i < propCount; ++i)
+        {
+            key.clear();
+            key.reserve(baseKey.size() + 16 + propertyStr.size()); // avoid reallocations
+            key.append(baseKey).append(std::to_string(i)).append(".").append(propertyStr);
+
+            UT_KVP_PROFILE_GET_STRING(key.c_str(), returnedString);
+
+            if (returnedString[0] != '\0')
+            {
+                found = true;
+                returnedString[0] = '\0'; // reset returnedString
+                break;
+            }
+        }
+
+        UT_ASSERT_TRUE(found);
+    }
 }
 
-UT_ADD_TEST(VTS_L1_DEVICEINFO, testGet_neg)
+/**
+ * @brief Test for getHALVersion() function of IDeviceInfo
+ *
+ * This test verifies that the getHALVersion() method of the IDeviceInfo interface
+ * correctly populates the HALVersion structure with the expected version values.
+ *
+ * **Test Group ID:** 02@n
+ * **Test Case ID:** 002@n
+ *
+ * **Test Procedure:**
+ * Refer to Deviceinfo specification documentation [deviceinfo_L1_Low-Level_TestSpecification](../docs/pages/)
+ */
+UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getHALVersion)
 {
+    android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
+    UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
+    com::rdk::hal::deviceinfo::HALVersion halVersion;
+    DEVICEINFO_GET_HALVERSION(deviceInfo, halVersion);
+    UT_LOG_DEBUG("HAL Version: Major=%d, Minor=%d, Doc=%d", halVersion.major, halVersion.minor, halVersion.doc);
+    UT_ASSERT_EQUAL(halVersion.major, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.major"));
+    UT_ASSERT_EQUAL(halVersion.minor, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.minor"));
+    UT_ASSERT_EQUAL(halVersion.doc, UT_KVP_PROFILE_GET_UINT8("IDeviceInfo.HALVersion.doc"));
+}
+
+/**
+ * @brief Test for verifying setProperty() and getProperty() functions of IDeviceInfo
+ *
+ * This test verifies that the setProperty() and getProperty() methods of the IDeviceInfo interface
+ * correctly set and retrieve property values for all supported properties.
+ *
+ * **Test Group ID:** 02@n
+ * **Test Case ID:** 003@n
+ *
+ * **Test Procedure:**
+ * Refer to Deviceinfo specification documentation [deviceinfo_L1_Low-Level_TestSpecification](../docs/pages/)
+ */
+UT_ADD_TEST(VTS_L1_DEVICEINFO, test_verifyCapabilities)
+{
+    android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
+    UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
+    com::rdk::hal::deviceinfo::Capabilities caps;
+    com::rdk::hal::deviceinfo::SetPropertyResult result;
+
+    DEVICEINFO_GET_CAPABILITIES(deviceInfo, caps);
+    UT_ASSERT_EQUAL(caps.supportedProperties.size(), UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties"));
+
+    for (const auto &property : caps.supportedProperties)
+    {
+        const std::string propertyStr = android::internal::ToString(property);
+        UT_LOG_DEBUG("Supported Property: %s", propertyStr.c_str());
+        std::optional<::android::String16> value = std::nullopt;
+        const int propCount = UT_KVP_PROFILE_GET_LIST_COUNT("IDeviceInfo.supportedProperties");
+        const std::string baseKey = "IDeviceInfo.supportedProperties.";
+        bool found = false;
+        std::string key;
+        char returnedString[UT_KVP_MAX_ELEMENT_SIZE] = {0}; // or appropriate size
+
+        for (int i = 0; i < propCount; ++i)
+        {
+            key.clear();
+            key.reserve(baseKey.size() + 16 + propertyStr.size()); // avoid reallocations
+            key.append(baseKey).append(std::to_string(i)).append(".").append(propertyStr);
+
+            UT_KVP_PROFILE_GET_STRING(key.c_str(), returnedString);
+            DEVICEINFO_GET_PROPERTY(deviceInfo, property, value);
+
+            if (returnedString[0] != '\0')
+            {
+                found = true;
+                UT_ASSERT_EQUAL(value.value(), android::String16(android::String8(returnedString)));
+                returnedString[0] = '\0'; // reset returnedString
+                break;
+            }
+        }
+
+        UT_ASSERT_TRUE(found);
+    }
+}
+
+UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getPropertyNegative)
+{
+    android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
+    UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
+
+    // Testing with an invalid property key
+    std::optional<::android::String16> value = std::nullopt;
     android::String16 key("KEY_INVALID");
-    std::optional<::android::String16> value;
-    DEVICEINFO_GET_PROPERTY_NEGATIVE(gDEVICEINFOHandle, key, value);
-    return;
+    DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceInfo, key, value);
+    UT_ASSERT_FALSE(value.has_value());
+
+    // Testing with an empty property key
+    value = std::nullopt;
+    key = android::String16("");
+    DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceInfo, key, value);
+    UT_ASSERT_FALSE(value.has_value());
+
+    // Testing with a null property key
+    value = std::nullopt;
+    key = android::String16(); // This creates an empty String16, simulating a null key
+    DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceInfo, key, value);
+    UT_ASSERT_FALSE(value.has_value());
+
 }
 
 /**

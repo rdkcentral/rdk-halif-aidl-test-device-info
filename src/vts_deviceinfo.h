@@ -62,8 +62,13 @@
 
 #pragma once
 
-#include <ut.h>
-#include <ut_kvp_profile.h>
+#include <binder/IServiceManager.h>
+#include <binder/ProcessState.h>
+#include <binder/IPCThreadState.h>
+#include <binder/Status.h>
+#include <utils/String16.h>
+
+#include "com/rdk/hal/deviceinfo/IDeviceInfo.h"
 #include <com/rdk/hal/deviceinfo/BpDeviceInfo.h>
 #include <com/rdk/hal/deviceinfo/Capabilities.h>
 #include <com/rdk/hal/deviceinfo/HALVersion.h>
@@ -86,9 +91,6 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
         UT_ASSERT_TRUE(status.isOk()); \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_NONE); \
         UT_LOG_DEBUG("Capabilities supportedProperties size: %zu", caps.supportedProperties.size()); \
-        for (const auto& prop : caps.supportedProperties) { \
-            UT_LOG_DEBUG("Supported Property: %s", android::String8(prop).string()); \
-        } \
     } while (0)
 
 // Macro for getHALVersion - positive case
@@ -111,61 +113,23 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
         status = (deviceinfoHandle)->getProperty(key, &value); \
         UT_LOG_DEBUG("Result getProperty(OUT:%s), status:[isOK:%d, exception:%d]", android::String8(value.value()).string(), status.isOk(), status.exceptionCode()); \
         UT_ASSERT_TRUE(status.isOk()); \
+        UT_ASSERT_TRUE(value.has_value()); \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_NONE); \
         UT_LOG_DEBUG("Property Value: %s", android::String8(value.value()).string()); \
-        value = std::nullopt; \
-    } while (0)
-
-// Macro for setProperty - positive case
-#define DEVICEINFO_SET_PROPERTY(deviceinfoHandle, key, val, result) \
-    do { \
-        ::android::binder::Status status; \
-        UT_LOG_DEBUG("Calling setProperty(IN:key[%s], IN:val[%s], OUT:result[])", android::String8(key).string(), android::String8(val).string()); \
-        status = (deviceinfoHandle)->setProperty(key, val, &result); \
-        UT_LOG_DEBUG("Result setProperty(OUT:%d), status:[isOK:%d, exception:%d]", result, status.isOk(), status.exceptionCode()); \
-        UT_ASSERT_TRUE(status.isOk()); \
-        UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_NONE); \
-        UT_ASSERT_EQUAL(result, SetPropertyResult::SUCCESS); \
-        UT_LOG_DEBUG("Set Property Result: %s", toString(result).c_str()); \
     } while (0)
 
 // Macro for getProperty - negative case
-#define DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceinfoHandle, key, value) \
-    do { \
-        ::android::binder::Status status; \
-        UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", android::String8(key).string()); \
+#define DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceinfoHandle, key, value)                                \
+    do                                                                                                \
+    {                                                                                                 \
+        ::android::binder::Status status;                                                             \
+        UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", key ? android::String8(key).string() : "null"); \
         status = (deviceinfoHandle)->getProperty(key, &value); \
         UT_LOG_DEBUG("Result getProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
         UT_ASSERT_FALSE(status.isOk()); \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_ILLEGAL_ARGUMENT); \
         UT_ASSERT_FALSE(value.has_value()); \
     } while (0)
-
-// Macro for setProperty - negative case
-#define DEVICEINFO_SET_PROPERTY_NEGATIVE(deviceinfoHandle, key, val, result)                                   \
-    do                                                                                                         \
-    {                                                                                                          \
-        ::android::binder::Status status;                                                    \
-        UT_LOG_DEBUG("Calling setProperty(IN:key[%s], IN:val[%s], OUT:result[])", android::String8(key).string(), android::String8(val).string()); \
-        status = (deviceinfoHandle)->setProperty(key, val, &result);                                           \
-        UT_LOG_DEBUG("Result setProperty(OUT:value), status:[isok:%d, exception:%d, result:%d]", status.isOk(), status.exceptionCode(), result); \
-        UT_ASSERT_FALSE(status.isOk());                                                                        \
-        UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_ILLEGAL_ARGUMENT);               \
-        UT_ASSERT_EQUAL(result, SetPropertyResult::ERROR_INVALID_PARAM);                                   \
-    } while (0)
-
-// static inline std::string toString(SetPropertyResult result) {
-//     switch (result) {
-//         case SetPropertyResult::SUCCESS:
-//             return "SUCCESS";
-//         case SetPropertyResult::ERROR_INVALID_PARAM:
-//             return "ERROR_INVALID_PARAM";
-//         case SetPropertyResult::ERROR_MEMORY_EXHAUSTED:
-//             return "ERROR_MEMORY_EXHAUSTED";
-//         default:
-//             return "UNKNOWN";
-//     }
-// }
 
 /**
  * @} // End of DEVICEINFO_HALTEST_CLASS

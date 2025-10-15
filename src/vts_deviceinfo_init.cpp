@@ -102,10 +102,6 @@ UT_status_t VTS_DEVICEINFO_init()
         UT_LOG_ERROR("Failed to get DeviceInfo Service");
         return UT_STATUS_FAILURE;
     }
-    // if(vts_deviceinfo_parse_hfp() != UT_STATUS_OK)
-    // {
-    //     UT_LOG_ERROR("Failed to process the DeviceInfo HFP file");
-    // }
 
     return UT_STATUS_OK;
 }
