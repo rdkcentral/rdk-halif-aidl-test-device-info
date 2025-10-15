@@ -57,8 +57,13 @@
 
 /**
  * @file vts_deviceinfo_l1_tests.cpp
+ * @brief L1 Test Cases for the DEVICEINFO HAL (Hardware Abstraction Layer) interface.
  *
- */
+ * This file contains unit tests for the DEVICEINFO module as part of the Hardware Porting Kit (HPK).
+ * The tests validate the correct implementation of the IDeviceInfo interface, including its capabilities,
+ * versioning, and property handling functionalities.
+ *
+ * @addtogroup HPK Hardware */
 
 
 #include <ut_log.h>
@@ -98,7 +103,13 @@ public:
  * **Test Case ID:** 001@n
  *
  * **Test Procedure:**
- * Refer to Deviceinfo specification documentation [deviceinfo_L1_Low-Level_TestSpecification](../docs/pages/)
+ * | Step | Action                                          | Input / Test Data                                       | Expected Result                         | Notes                                      |
+ * |------|-------------------------------------------------|---------------------------------------------------------|-----------------------------------------|--------------------------------------------|
+ * | 1    | Obtain deviceInfo handle                        | gDEVICEINFOHandle                                       | deviceInfo is not nullptr               |                                            |
+ * | 2    | Call DEVICEINFO_GET_CAPABILITIES                | deviceInfo, caps                                        | caps.supportedProperties is populated   |                                            |
+ * | 3    | Compare supportedProperties count               | caps.supportedProperties, UT_KVP_PROFILE_GET_LIST_COUNT | Counts are equal                        |                                            |
+ * | 4    | For each property, check if present in profile  | property, UT_KVP_PROFILE_GET_STRING                     | found == true                           | Checks each property string against profile|
+ *
  */
 
 UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getCapabilities)
@@ -149,7 +160,12 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getCapabilities)
  * **Test Case ID:** 002@n
  *
  * **Test Procedure:**
- * Refer to Deviceinfo specification documentation [deviceinfo_L1_Low-Level_TestSpecification](../docs/pages/)
+ * | Step | Action                          | Input / Test Data                                   | Expected Result                 | Notes      |
+ * |------|---------------------------------|-----------------------------------------------------|---------------------------------|------------|
+ * | 1    | Obtain deviceInfo handle        | gDEVICEINFOHandle                                   | deviceInfo is not nullptr       |            |
+ * | 2    | Call DEVICEINFO_GET_HALVERSION  | deviceInfo, halVersion                              | halVersion is populated         |            |
+ * | 3    | Compare HALVersion fields       | halVersion.major/minor/doc, profile values          | All fields match profile values |            |
+ *
  */
 UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getHALVersion)
 {
@@ -173,7 +189,12 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getHALVersion)
  * **Test Case ID:** 003@n
  *
  * **Test Procedure:**
- * Refer to Deviceinfo specification documentation [deviceinfo_L1_Low-Level_TestSpecification](../docs/pages/)
+ * | Step | Action                                          | Input / Test Data                                       | Expected Result                         | Notes                                      |
+ * |------|-------------------------------------------------|---------------------------------------------------------|-----------------------------------------|--------------------------------------------|
+ * | 1    | Obtain deviceInfo handle                        | gDEVICEINFOHandle                                       | deviceInfo is not nullptr               |                                            |
+ * | 2    | Call DEVICEINFO_GET_CAPABILITIES                | deviceInfo, caps                                        | caps.supportedProperties is populated   |                                            |
+ * | 3    | Compare supportedProperties count               | caps.supportedProperties, UT_KVP_PROFILE_GET_LIST_COUNT | Counts are equal                        |                                            |
+ * | 4    | For each property, get the property value       | property, value, UT_KVP_PROFILE_GET_STRING              | Retrieved value matches the yaml profile|Checks each property string against profile|
  */
 UT_ADD_TEST(VTS_L1_DEVICEINFO, test_verifyCapabilities)
 {
@@ -218,6 +239,23 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, test_verifyCapabilities)
     }
 }
 
+/**
+ * @brief Negative Test for getProperty() function of IDeviceInfo
+ *
+ * This test verifies that the getProperty() method of the IDeviceInfo interface
+ * correctly handles invalid, empty, and null property keys.
+ *
+ * **Test Group ID:** 02@n
+ * **Test Case ID:** 004@n
+ *
+ * **Test Procedure:**
+ * | Step | Action                                                 | Input / Test Data                          | Expected Result           | Notes      |
+ * |------|--------------------------------------------------------|--------------------------------------------|---------------------------|------------|
+ * | 1    | Obtain deviceInfo handle                               | gDEVICEINFOHandle                          | deviceInfo is not nullptr |            |
+ * | 2    | Call DEVICEINFO_GET_PROPERTY_NEGATIVE with invalid key | deviceInfo, "KEY_INVALID", value           | value.has_value() is false|            |
+ * | 3    | Call DEVICEINFO_GET_PROPERTY_NEGATIVE with empty key   | deviceInfo, "", value                      | value.has_value() is false|            |
+ * | 4    | Call DEVICEINFO_GET_PROPERTY_NEGATIVE with null key    | deviceInfo, null, value                    | value.has_value() is false|            |
+*/
 UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getPropertyNegative)
 {
     android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
