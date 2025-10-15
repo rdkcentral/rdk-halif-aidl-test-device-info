@@ -20,7 +20,7 @@
 #* ******************************************************************************
 
 RUN_DIR=$(realpath "$(dirname "$0")")
-VCOMPONENT_SERVICE_NAME=VComponentDeviceinfoService
+VCOMPONENT_SERVICE_NAME=Vendor-DeviceInfo
 VCOMPONENT_CONFIG_PATH=${RUN_DIR}/vcomponent_configurations/deviceinfo_vcomponent_configuration.yaml
 VCOMPONENT_PORT=8075
 # Function to check if a process is running
@@ -68,15 +68,6 @@ start_vcomponent_service()
 
 if check_process $VCOMPONENT_SERVICE_NAME; then
     echo "${VCOMPONENT_SERVICE_NAME} is already running"
-    mocservice_pid=$(pgrep -f $VCOMPONENT_SERVICE_NAME)
-    if prompt_yes_no "Do you want to re-start ${VCOMPONENT_SERVICE_NAME}?"; then
-        echo "Killing existing ${VCOMPONENT_SERVICE_NAME} (PID: $mocservice_pid)"
-        kill $mocservice_pid
-        sleep 2
-        start_vcomponent_service
-    else
-        echo "Continuing with existing ${VCOMPONENT_SERVICE_NAME} (PID: $mocservice_pid)"
-    fi
 else
     start_vcomponent_service
 fi

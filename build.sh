@@ -31,13 +31,11 @@ declare -r TOP=`dirname $(realpath $0)`
 declare -r HALIF_VERSION=current
 RDK_HALIF_AIDL_VERSION="${RDK_HALIF_AIDL_VERSION="main"}"
 RDK_HALIF_TEST_BASE_URL="https://github.com/rdkcentral/rdk-halif-binder-test-"
+VCOMPONENT_DEVICEINFO_VERSION="${VCOMPONENT_DEVICEINFO_VERSION="main"}"
+OUT_TAR_FILE=vts-deviceinfo.tar.gz
 
 declare -A HALIF_COMPONENTS=(
   [deviceinfo]="current"
-)
-
-declare -A HALIF_TEST_COMPONENTS=(
-  [deviceinfo]="RDK_HALIF_CEC_TEST_VERSION"
 )
 
 # Define the directory where the repository will be cloned
@@ -192,7 +190,7 @@ build_vcomponent_services()
 
     pushd ${VCOMPONENT_DIR}
 
-    git checkout feature/implement-vcomponent-deviceinfo #Remove this line, once vcomponent PR is merged
+    git checkout ${VCOMPONENT_DEVICEINFO_VERSION}
 
     make -j"$(nproc)" -C "${TOP}/vcomponent" BUILD_DIR="${TOP_BUILD_DIR}" UT_CORE_DIR="${UT_CORE_DIR}"
     if [ $? -ne 0 ]; then
@@ -234,6 +232,10 @@ install_test()
     cp -r ${PROFILES_DIR} ${INSTALL_PATH}
     cp -r "${TOP}/vcomponent/vcomponent_configurations" ${INSTALL_PATH}
     cp -r "${TOP}/vcomponent/deviceInfo_populate_controlPlane.sh" ${INSTALL_PATH}
+
+    cd ${INSTALL_PATH}
+    tar -czf ${OUT_TAR_FILE} *
+    cd -
 }
 
 ###############################################################################
@@ -246,6 +248,9 @@ clean_test()
     rm -rf test/*.o
     rm -rf ${TOP}/vcomponent/src/*.o
     rm -rf ${TOP}/src/*.o
+    make -C ${AIDL_LIB_DIR} clean
+    make -C ${VCOMPONENT_DIR} clean
+    make clean
 }
 
 ###############################################################################

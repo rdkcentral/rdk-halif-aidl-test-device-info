@@ -69,44 +69,16 @@ The build.sh script:
 
 - Generates binaries in the `build/bin` directory.
 
-Example directory structure :
-
-```bash
-build/bin/
-├── lib
-├── libaidl_client.so
-├── libbase.so
-├── libbinder.so
-├── libcutils.so
-├── libcutils_sockets.so
-├── liblog.so
-├── libut_control.so
-├── libutils.so
-├── profiles
-│   └── hfp-deviceinfo-vcomponent.yaml
-├── run.sh
-├── servicemanager
-├── vcomponent_configurations
-│   └── deviceinfo_vcomponent_configuration.yaml
-├── VComponentDeviceinfoService
-└── vts_deviceinfo_hal_test
-```
+- Also generates `vts-deviceinfo.tar.gz` tar ball in `build/bin` folder
 
 ## Run test
-
-- Package the Binaries:
-
-```bash
-cd build
-tar -zcf deviceinfo_vts.tar.gz bin
-```
 
 - Transfer to Target Device:
 
 Copy the tarball to the target device (e.g., using scp):
 
 ```bash
-scp deviceinfo_vts.tar.gz root@target-device:/home/root/
+scp -p <port> vts-deviceinfo.tar.gz root@target-device:/home/root/
 
 ```
 
@@ -117,8 +89,9 @@ Log into the target device and extract the tarball:
 ```bash
 ssh root@target-device
 cd /home/root
-tar -zxf deviceinfo_vts.tar.gz
-cd bin
+mkdir deviceinfo
+tar -zxf vts-deviceinfo.tar.gz -C deviceinfo
+cd deviceinfo
 ```
 
 - Run the VTS Test on Target Device

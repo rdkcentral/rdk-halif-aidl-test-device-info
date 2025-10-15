@@ -126,7 +126,6 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getCapabilities_pos)
         const std::string propertyStr = android::internal::ToString(property);
         UT_LOG_DEBUG("Supported Property: %s", propertyStr.c_str());
         std::string key;
-        char returnedString[UT_KVP_MAX_ELEMENT_SIZE] = {0};
         key = baseKey + "." + std::to_string(i) + "." + propertyStr;
         UT_ASSERT_TRUE(ut_kvp_fieldPresent(ut_kvp_profile_getInstance(), key.c_str()));
         i++;
@@ -199,20 +198,20 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
 
         DEVICEINFO_GET_PROPERTY(deviceInfo, property, value); // Get the property value from HAL
 
-        bool found = false;
         std::string key;
         char returnedString[UT_KVP_MAX_ELEMENT_SIZE] = {0}; // Buffer to hold expected value from profile
         key = baseKey + "." + std::to_string(i) + "." + propertyStr;
         UT_KVP_PROFILE_GET_STRING(key.c_str(), returnedString); // Get expected value from profile
 
-        if (returnedString[0] != '\0')
+        if (std::string(android::internal::ToString(value.value())) == std::string(returnedString))
         {
-            found = true;
-            UT_ASSERT_EQUAL(value.value(), android::String16(android::String8(returnedString))); // Compare values
-            returnedString[0] = '\0'; // reset returnedString
+            UT_ASSERT_TRUE(true); // Values match
+        }
+        else
+        {
+            UT_ASSERT_TRUE(false); // Values do not match
         }
 
-        UT_ASSERT_TRUE(found);
         i++;
     }
 }
