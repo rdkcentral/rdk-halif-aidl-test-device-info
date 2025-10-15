@@ -180,9 +180,9 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getHALVersion)
 }
 
 /**
- * @brief Test for verifying setProperty() and getProperty() functions of IDeviceInfo
+ * @brief Positive test for verifying getProperty() functions of IDeviceInfo
  *
- * This test verifies that the setProperty() and getProperty() methods of the IDeviceInfo interface
+ * This test verifies that the getProperty() methods of the IDeviceInfo interface
  * correctly set and retrieve property values for all supported properties.
  *
  * **Test Group ID:** 02@n
@@ -196,7 +196,7 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getHALVersion)
  * | 3    | Compare supportedProperties count               | caps.supportedProperties, UT_KVP_PROFILE_GET_LIST_COUNT | Counts are equal                        |                                            |
  * | 4    | For each property, get the property value       | property, value, UT_KVP_PROFILE_GET_STRING              | Retrieved value matches the yaml profile|Checks each property string against profile|
  */
-UT_ADD_TEST(VTS_L1_DEVICEINFO, test_verifyCapabilities)
+UT_ADD_TEST(VTS_L1_DEVICEINFO, test_getProperty)
 {
     android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
     UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
