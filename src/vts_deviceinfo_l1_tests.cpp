@@ -189,7 +189,6 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
     android::sp<com::rdk::hal::deviceinfo::IDeviceInfo> deviceInfo = gDEVICEINFOHandle;
     UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
     com::rdk::hal::deviceinfo::Capabilities caps;
-    com::rdk::hal::deviceinfo::SetPropertyResult result;
     const std::string baseKey = "IDeviceInfo.supportedProperties";
     DEVICEINFO_GET_CAPABILITIES(deviceInfo, caps);
     UT_ASSERT_EQUAL(caps.supportedProperties.size(), UT_KVP_PROFILE_GET_LIST_COUNT(baseKey.c_str()));
