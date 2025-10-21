@@ -64,6 +64,9 @@ start_vcomponent_service()
     vcomponentservice_pid=$!
     # Wait for service to be ready
     sleep 1
+
+    export VCOMPONENT_SERVICE_PID=$vcomponentservice_pid
+    echo "${VCOMPONENT_SERVICE_NAME} started with PID: $vcomponentservice_pid"
 }
 
 if check_process $VCOMPONENT_SERVICE_NAME; then

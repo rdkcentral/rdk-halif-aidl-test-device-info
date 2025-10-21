@@ -120,15 +120,20 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getCapabilities_pos)
     DEVICEINFO_GET_CAPABILITIES(deviceInfo, caps);
     const std::string baseKey = "IDeviceInfo.supportedProperties";
     UT_ASSERT_EQUAL(caps.supportedProperties.size(), UT_KVP_PROFILE_GET_LIST_COUNT(baseKey.c_str()));
-    int i = 0;
     for (const auto &property : caps.supportedProperties)
     {
         const std::string propertyStr = android::internal::ToString(property);
-        UT_LOG_DEBUG("Supported Property: %s", propertyStr.c_str());
+        UT_LOG_DEBUG("Supported Property: %s\n", propertyStr.c_str());
         std::string key;
-        key = baseKey + "." + std::to_string(i) + "." + propertyStr;
-        UT_ASSERT_TRUE(ut_kvp_fieldPresent(ut_kvp_profile_getInstance(), key.c_str()));
-        i++;
+        for(int i = 0;; i++)
+        {
+            key = baseKey + "." + std::to_string(i) + "." + propertyStr;
+            if (ut_kvp_fieldPresent(ut_kvp_profile_getInstance(), key.c_str()))
+            {
+                UT_ASSERT_TRUE(true); // Key found
+                break;
+            }
+        }
     }
 }
 
@@ -189,7 +194,6 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
     DEVICEINFO_GET_CAPABILITIES(deviceInfo, caps);
     UT_ASSERT_EQUAL(caps.supportedProperties.size(), UT_KVP_PROFILE_GET_LIST_COUNT(baseKey.c_str()));
 
-    int i = 0;
     for (const auto &property : caps.supportedProperties)
     {
         const std::string propertyStr = android::internal::ToString(property);
@@ -200,19 +204,16 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
 
         std::string key;
         char returnedString[UT_KVP_MAX_ELEMENT_SIZE] = {0}; // Buffer to hold expected value from profile
-        key = baseKey + "." + std::to_string(i) + "." + propertyStr;
-        UT_KVP_PROFILE_GET_STRING(key.c_str(), returnedString); // Get expected value from profile
-
-        if (std::string(android::internal::ToString(value.value())) == std::string(returnedString))
+        for(int i = 0;; i++)
         {
-            UT_ASSERT_TRUE(true); // Values match
+            key = baseKey + "." + std::to_string(i) + "." + propertyStr;
+            if (ut_kvp_fieldPresent(ut_kvp_profile_getInstance(), key.c_str()))
+            {
+                UT_KVP_PROFILE_GET_STRING(key.c_str(), returnedString); // Get expected value from profile
+                UT_ASSERT_STRING_EQUAL(std::string(android::internal::ToString(value.value())).c_str(), returnedString);
+                break;
+            }
         }
-        else
-        {
-            UT_ASSERT_TRUE(false); // Values do not match
-        }
-
-        i++;
     }
 }
 

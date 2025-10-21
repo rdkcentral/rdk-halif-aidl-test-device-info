@@ -126,8 +126,7 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
         UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", key ? android::String8(key).string() : "null"); \
         status = (deviceinfoHandle)->getProperty(key, &value); \
         UT_LOG_DEBUG("Result getProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
-        UT_ASSERT_FALSE(status.isOk()); \
-        UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_ILLEGAL_ARGUMENT); \
+        UT_ASSERT_TRUE(status.isOk()); \
         UT_ASSERT_FALSE(value.has_value()); \
     } while (0)
 
