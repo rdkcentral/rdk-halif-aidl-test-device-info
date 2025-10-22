@@ -15,6 +15,8 @@ git clone -b develop 'ssh://git@github.com/rdk-e/linux_binder_idl.git'
 
 cd linux_binder_idl
 
+sc docker run rdk-kirkstone /bin/bash //preferred
+
 ./build-linux-binder-aidl.sh 64
 ```
 
@@ -23,11 +25,11 @@ cd linux_binder_idl
 Clone and build the test suite:
 
 ```bash
-git clone git@github.com:rdkcentral/rdk-halif-binder-test-device-info.git
+git clone git@github.com:rdkcentral/rdk-halif-aidl-test-device-info.git
 ```
 
 ```bash
-cd rdk-halif-binder-test-device-info
+cd rdk-halif-aidl-test-device-info
 ```
 
 Set below environment variable:
@@ -58,7 +60,7 @@ export ENABLE_UT_INFO_LOGGING=1
 Run the build script:
 
 ```bash
-./build.sh TARGET=linux
+./build.sh Target=linux
 ```
 
 The build.sh script:
