@@ -5,8 +5,7 @@
 - [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
 - [Introduction](#introduction)
 - [Module Description](#module-description)
-- [L2 Test Specification](#l2-test-specification)
-- [L3 Test Specification](#l3-test-specification)
+- [Test Specification](#test-specification)
 
 ## Acronyms, Terms and Abbreviations
 
@@ -30,7 +29,7 @@ This document provides an overview of the testing requirements for the Deviceinf
 The DeviceInfo HAL provides a standardized interface for accessing and managing device-specific information on RDK platforms. It is designed to support system-level services, diagnostics, UI components, and vendor-specific features by exposing key device properties through a stable AIDL interface.
 
 
-## L2 Test Specification
+## Test Specification
 
 |Test|Description|HAL APIs|
 |----|-----------|--------|
