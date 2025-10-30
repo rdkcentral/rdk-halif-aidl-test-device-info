@@ -125,7 +125,7 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getCapabilities_pos)
         const std::string propertyStr = android::internal::ToString(property);
         UT_LOG_DEBUG("Supported Property: %s\n", propertyStr.c_str());
         std::string key;
-        for(int i = 0;; i++)
+        for(int i = 0;i < (int)caps.supportedProperties.size(); i++)
         {
             key = baseKey + "." + std::to_string(i) + "." + propertyStr;
             if (ut_kvp_fieldPresent(ut_kvp_profile_getInstance(), key.c_str()))
@@ -203,7 +203,7 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
 
         std::string key;
         char returnedString[UT_KVP_MAX_ELEMENT_SIZE] = {0}; // Buffer to hold expected value from profile
-        for(int i = 0;; i++)
+        for(int i = 0; i < (int)caps.supportedProperties.size(); i++)
         {
             key = baseKey + "." + std::to_string(i) + "." + propertyStr;
             if (ut_kvp_fieldPresent(ut_kvp_profile_getInstance(), key.c_str()))

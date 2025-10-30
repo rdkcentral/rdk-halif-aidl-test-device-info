@@ -72,4 +72,4 @@ void VTS_DEVICEINFO_destroy();
  * @} // End of DEVICEINFO
  * @} // End of HPK
  */
-/* End of vts_deviceinfo.h */
+/* End of vts_deviceinfo_init.h */

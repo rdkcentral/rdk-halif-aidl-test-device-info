@@ -96,10 +96,10 @@ generate_hal_interfaces()
     # Clone the repository if not already present
     if [ ! -d "$RDK_HAL_DIR" ]; then
         echo "Checking out version: " $RDK_HALIF_AIDL_VERSION
-        git clone -b $RDK_HALIF_AIDL_VERSION 'http://git@github.com/rdkcentral/rdk-halif-aidl.git' $RDK_HAL_DIR
+        git clone -b $RDK_HALIF_AIDL_VERSION 'https://github.com/rdkcentral/rdk-halif-aidl.git' $RDK_HAL_DIR
     fi
 
-    # Iterate through the HALIF compoenents
+    # Iterate through the HALIF components and generate the AIDL C++ headers
     for component in "${!HALIF_COMPONENTS[@]}"; do
         version=${HALIF_COMPONENTS[$component]}
         echo "Component: $component, Version: $version"
