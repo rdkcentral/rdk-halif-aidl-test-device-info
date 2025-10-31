@@ -8,7 +8,7 @@ The test suite depends on the Linux binder with `AIDL` support. Follow these ste
 
 For detail build instruction, please refer to [Linux Binder](https://github.com/rdkcentral/linux_binder_idl/tree/main)
 
-Here outline the simplest steps are
+Here are the simplest steps outlined:
 
 ```bash
 git clone -b develop 'https://github.com/rdkcentral/linux_binder_idl.git'
