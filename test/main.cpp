@@ -79,6 +79,11 @@ int main(int argc, char **argv)
     UT_LOG_INFO("==========================================================================");
 
     result = VTS_DEVICEINFO_init();
+    if (result != UT_STATUS_OK)
+    {
+        UT_LOG_ERROR("VTS_DEVICEINFO_init() failed!");
+        return result;
+    }
 
     result = UT_run_tests();
 
