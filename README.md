@@ -6,12 +6,12 @@
 
 The test suite depends on the Linux binder with `AIDL` support. Follow these steps to build it:
 
-For detail build instruction, please refer to [Linux Binder](https://github.com/rdk-e/linux_binder_idl/tree/main)
+For detail build instruction, please refer to [Linux Binder](https://github.com/rdkcentral/linux_binder_idl/tree/main)
 
 Here outline the simplest steps are
 
 ```bash
-git clone -b develop 'ssh://git@github.com/rdk-e/linux_binder_idl.git'
+git clone -b develop 'https://github.com/rdkcentral/linux_binder_idl.git'
 
 cd linux_binder_idl
 
