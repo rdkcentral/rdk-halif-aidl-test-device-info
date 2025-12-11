@@ -25,14 +25,14 @@ Deviceinfo:
         artifacts:
         #List of artifacts folders, test class copies the content of folder to the target device workspace
           - "../../build/bin/vts-deviceinfo.tar.gz"
-        # exectute command, this will appended with the target device workspace path
+        # execute command, this will appended with the target device workspace path
         execute: "./run.sh"
         type: UT-C # C (UT-C Cunit) / C++ (UT-G (g++ ut-core gtest backend))
         suites:
             0:
                 name: "VTS_L1_DEVICEINFO"
                 tests: 
-                    - "getCapabilities_pos"
-                    - "getHALVersion_pos"
-                    - "getProperty_pos"
-                    - "getProperty_neg"
+                - "getCapabilities_pos"
+                - "getHALVersion_pos"
+                - "getProperty_pos"
+                - "getProperty_neg"

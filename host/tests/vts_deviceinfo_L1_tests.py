@@ -50,12 +50,11 @@ class  vts_deviceinfo_L1_tests(deviceinfoHelperClass):
         """
         qcId = "1"
         self.testName = "deviceinfo_L1"
-        #configureNetwork = False
         super().__init__(self.testName, qcId, log)
 
     def runTest(self, testSuite, test_case:str=None):
         """
-        Runs the test case passed to this funtion
+        Runs the test case passed to this function
         Args:
             test_case (str, optional): test case name to run, default runs all test
         Returns:

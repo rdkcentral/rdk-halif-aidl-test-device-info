@@ -54,7 +54,7 @@ function ECHO()
 
 function DEBUG()
 {
-    # if set -x is in use debug messages are useless as whole stript will be shown
+    # if set -x is in use debug messages are useless as whole script will be shown
     if [[ "$-" =~ "x" ]]; then
         return
     fi
@@ -85,7 +85,7 @@ function install_pip_requirements()
 
     if [ ! -f ${requirements_file} ]; then
         WARNING "No ${requirements_file} found"
-        return  # Exit the function if the file exists
+        return  # Exit the function if the file does not exist
     fi
 
     INFO "install_pip_requirements( ${requirements_file} ):"
@@ -116,7 +116,6 @@ function clone_repo()
             INFO "git clone ${repo_url} @ ${version} ${CYAN}${message}${NO_COLOR}"
             git clone ${repo_url} "${path}"
             cd ${path}
-            #INFO "git checkout ${version}"
             git checkout ${version}
             cd -
         fi

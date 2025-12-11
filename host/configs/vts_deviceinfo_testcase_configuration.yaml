@@ -34,7 +34,7 @@ Deviceinfo:
     #######################################
     - name: "VTS_L1_DEVICEINFO"
       test_cases: 
-          - "getCapabilities_pos"
-          - "getHALVersion_pos"
-          - "getProperty_pos"
-          - "getProperty_neg"
+        - "getCapabilities_pos"
+        - "getHALVersion_pos"
+        - "getProperty_pos"
+        - "getProperty_neg"

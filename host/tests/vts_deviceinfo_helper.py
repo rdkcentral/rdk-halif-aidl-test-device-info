@@ -4,7 +4,7 @@
 # * If not stated otherwise in this file or this component's LICENSE file the
 # * following copyright and licenses apply:
 # *
-# * Copyright 2024 RDK Management
+# * Copyright 2025 RDK Management
 # *
 # * Licensed under the Apache License, Version 2.0 (the "License");
 # * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@
 import os
 import sys
 import tarfile
-import yaml
 import time
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -36,14 +35,40 @@ from raft.framework.core.logModule import logModule
 from raft.framework.plugins.ut_raft.utSuiteNavigator import UTSuiteNavigatorClass
 from raft.framework.plugins.ut_raft.utBaseUtils import utBaseUtils
 from raft.framework.plugins.ut_raft.utUserResponse import utUserResponse
-from raft.framework.core.utPlaneController import utPlaneController
 
 DEVICEINFO_TEST_MENU_CONFIGURATION_FILE = os.path.join(dir_path, "vts_deviceinfo_testMenuConfiguration.yaml")
 DEVICEINFO_TESTCASES_CONFIGURATION_FILE = os.path.join(os.path.join(dir_path, "../configs"), "vts_deviceinfo_testcase_configuration.yaml")
 DEVICEINFO_L3_TEST_CONFIG_FILE = os.path.join(os.path.join(dir_path, "../../test_configuration"), "vts_l3_deviceinfo.yaml")
 
 class deviceinfoHelperClass(utHelperClass):
-
+    """
+    Helper class for Device Information HAL testing.
+    This class extends utHelperClass to provide specific functionality for testing
+    the Device Information HAL interface. It handles test initialization, session
+    management, artifact deployment, and test cleanup operations.
+    Attributes:
+        moduleName (str): Name of the module being tested ("Deviceinfo")
+        profile_moduleName (str): Name of the profile module ("IDeviceinfo")
+        log (logModule): Logger instance for test logging
+        deviceTestSetup (dict): Device test configuration
+        targetWorkspace (str): Target directory path for test artifacts
+        moduleHFPFile (str): Path to the HAL Function Profile file
+        waitTime (int): Wait time for test operations
+        device_type (str): Type of device under test
+        platform (str): Platform identifier
+        l3TestConfigFile (str): L3 test configuration file path
+        l3TestConfigFolder (str): L3 test configuration folder path
+        testMenuConfiguration (ConfigRead): Test menu configuration object
+        testCaseConfiguration (ConfigRead): Test case configuration object
+        hal_session: HAL test console session
+        hal_session_1: Secondary HAL test console session
+        utMenu (UTSuiteNavigatorClass): UT menu navigation utility
+        utilities (utBaseUtils): Base utility functions
+        testUserResponse (utUserResponse): User response handler
+    Methods:
+        __init__(testName, qcId, log): Initializes the deviceinfo helper class
+        testEndFunction(powerOff): Cleans up and ends the test case
+    """
     def __init__(self, testName:str, qcId:str, log:logModule=None ):
         """
         Initializes the test class
@@ -64,9 +89,6 @@ class deviceinfoHelperClass(utHelperClass):
         profileOnTarget = os.path.join(self.targetWorkspace, "profiles")
         profileOnTarget = os.path.join(profileOnTarget, os.path.basename(self.moduleHFPFile))
         profileOnTarget = profileOnTarget.replace("\\", "/")
-
-        platformConfigOnTarget = os.path.join(self.targetWorkspace, "test_configuration")
-        platformConfigOnTarget = platformConfigOnTarget.replace("\\", "/")
 
         self.l3TestConfigFolder = os.path.join(self.targetWorkspace, "test_configuration")
         self.l3TestConfigFolder = self.l3TestConfigFolder.replace("\\", "/")
