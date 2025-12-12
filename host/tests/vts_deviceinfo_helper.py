@@ -121,7 +121,6 @@ class deviceinfoHelperClass(utHelperClass):
             self.utilities.sftpCopy(self.hal_session, filesPath, self.targetWorkspace)
 
             if tarfile.is_tarfile(filesPath):
-                self.utilities.change_directory(self.hal_session, self.targetWorkspace)
                 target_tarfile = os.path.join(self.targetWorkspace, os.path.basename(artifact))
                 target_tarfile = target_tarfile.replace("\\", "/")
                 self.utilities.untar(self.hal_session, target_tarfile, self.targetWorkspace)
