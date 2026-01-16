@@ -71,15 +71,15 @@
 #include "com/rdk/hal/deviceinfo/IDeviceInfo.h"
 #include <com/rdk/hal/deviceinfo/BpDeviceInfo.h>
 #include <com/rdk/hal/deviceinfo/Capabilities.h>
-#include <com/rdk/hal/deviceinfo/HALVersion.h>
-#include <com/rdk/hal/deviceinfo/SetPropertyResult.h>
+#include <com/rdk/hal/deviceinfo/Property.h>
+#include <com/rdk/hal/deviceinfo/PropertyType.h>
 
 using android::sp;
 using android::String16;
 using com::rdk::hal::deviceinfo::IDeviceInfo;
 using com::rdk::hal::deviceinfo::Capabilities;
-using com::rdk::hal::deviceinfo::HALVersion;
-using com::rdk::hal::deviceinfo::SetPropertyResult;
+using com::rdk::hal::deviceinfo::Property;
+using com::rdk::hal::deviceinfo::PropertyType;
 
 // Macro for getCapabilities - positive case
 #define DEVICEINFO_GET_CAPABILITIES(deviceinfoHandle, caps) \
@@ -93,29 +93,20 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
         UT_LOG_DEBUG("Capabilities supportedProperties size: %zu", caps.supportedProperties.size()); \
     } while (0)
 
-// Macro for getHALVersion - positive case
-#define DEVICEINFO_GET_HALVERSION(deviceinfoHandle, version) \
-    do { \
-        ::android::binder::Status status; \
-        UT_LOG_DEBUG("Calling getHALVersion(OUT:version[])"); \
-        status = (deviceinfoHandle)->getHALVersion(&version); \
-        UT_LOG_DEBUG("Result getHALVersion(OUT:version), status:[isOK:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
-        UT_ASSERT_TRUE(status.isOk()); \
-        UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_NONE); \
-        UT_LOG_DEBUG("HAL Version: %d.%d.%d", version.major, version.minor, version.doc); \
-    } while (0)
-
 // Macro for getProperty - positive case
-#define DEVICEINFO_GET_PROPERTY(deviceinfoHandle, key, value) \
-    do { \
-        ::android::binder::Status status; \
-        UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", android::String8(key).string()); \
-        status = (deviceinfoHandle)->getProperty(key, &value); \
-        UT_LOG_DEBUG("Result getProperty(OUT:%s), status:[isOK:%d, exception:%d]", android::String8(value.value()).string(), status.isOk(), status.exceptionCode()); \
+#define DEVICEINFO_GET_PROPERTY(deviceinfoHandle, propertyKey, propertyVal)                                \
+    do                                                                                                \
+    {                                                                                                 \
+        ::android::binder::Status status;                                                             \
+        UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", android::String8(propertyKey).string()); \
+        status = (deviceinfoHandle)->getProperty(propertyKey, &propertyVal); \
+        UT_LOG_DEBUG("Result getProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
         UT_ASSERT_TRUE(status.isOk()); \
-        UT_ASSERT_TRUE(value.has_value()); \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_NONE); \
-        UT_LOG_DEBUG("Property Value: %s", android::String8(value.value()).string()); \
+        UT_LOG_DEBUG("Property key: %s", android::internal::ToString(propertyVal->key).c_str()); \
+        UT_LOG_DEBUG("Property type: %s", android::internal::ToString(propertyVal->type).c_str()); \
+        UT_LOG_DEBUG("Property sizeInBytes: %s", android::internal::ToString(propertyVal->sizeInBytes).c_str()); \
+        UT_LOG_DEBUG("Property zeroTerminated: %s", android::internal::ToString(propertyVal->zeroTerminated).c_str()); \
     } while (0)
 
 // Macro for getProperty - negative case
@@ -127,6 +118,7 @@ using com::rdk::hal::deviceinfo::SetPropertyResult;
         status = (deviceinfoHandle)->getProperty(key, &value); \
         UT_LOG_DEBUG("Result getProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
         UT_ASSERT_TRUE(status.isOk()); \
+        UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_NONE); \
         UT_ASSERT_FALSE(value.has_value()); \
     } while (0)
 
