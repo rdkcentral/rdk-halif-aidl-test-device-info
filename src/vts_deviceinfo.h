@@ -87,7 +87,7 @@ using com::rdk::hal::deviceinfo::PropertyType;
         ::android::binder::Status status; \
         UT_LOG_DEBUG("Calling getCapabilities(OUT:caps[])"); \
         status = (deviceinfoHandle)->getCapabilities(&caps); \
-        UT_LOG_DEBUG("Result getCapabilities(OUT:caps), status:[isOK:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
+        UT_LOG_DEBUG("Result getCapabilities(OUT:caps), status:[isoK:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
         UT_ASSERT_TRUE(status.isOk()); \
         UT_ASSERT_EQUAL(status.exceptionCode(), ::android::binder::Status::EX_NONE); \
         UT_LOG_DEBUG("Capabilities supportedProperties size: %zu", caps.supportedProperties.size()); \

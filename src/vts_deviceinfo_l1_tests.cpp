@@ -136,6 +136,16 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getCapabilities_pos)
                     UT_ASSERT_STRING_EQUAL(propertyValue, propertyStr.c_str()); // Key found
                     break;
                 }
+                else
+                {
+                    // With the current HFP, we must never reach here
+                    UT_LOG_DEBUG("Property %s not found in profile", propertyStr.c_str());
+                }
+            }
+            else
+            {
+                // Key not found in profile, log and continue
+                UT_LOG_DEBUG("Property name field not found in profile for index %d", i);
             }
         }
     }
@@ -210,6 +220,11 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
                     break;
                 }
             }
+            else
+            {
+                // Key not found in profile, log and continue
+                UT_LOG_DEBUG("Property name field not found in profile for index %d", i);
+            }
         }
     }
 }
@@ -237,7 +252,6 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_neg)
     UT_ASSERT_NOT_EQUAL(deviceInfo, nullptr);
 
     // Testing with an invalid property key
-    //std::optional<::android::String16> value = std::nullopt;
     std::optional<com::rdk::hal::deviceinfo::Property> propertyVal = std::nullopt;
     android::String16 key("KEY_INVALID");
     DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceInfo, key, propertyVal);
