@@ -136,11 +136,6 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getCapabilities_pos)
                     UT_ASSERT_STRING_EQUAL(propertyValue, propertyStr.c_str()); // Key found
                     break;
                 }
-                else
-                {
-                    // With the current HFP, we must never reach here
-                    UT_LOG_DEBUG("Property %s not found in profile", propertyStr.c_str());
-                }
             }
             else
             {
