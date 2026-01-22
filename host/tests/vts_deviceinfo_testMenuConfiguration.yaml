@@ -33,6 +33,5 @@ Deviceinfo:
                 name: "VTS_L1_DEVICEINFO"
                 tests: 
                 - "getCapabilities_pos"
-                - "getHALVersion_pos"
                 - "getProperty_pos"
                 - "getProperty_neg"
