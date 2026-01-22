@@ -66,7 +66,7 @@ Example:
 
 ```bash
 export UT_CORE_VERSION=5.0.0
-export RDK_HALIF_AIDL_VERSION=0.12.0
+export RDK_HALIF_AIDL_VERSION=0.13.1
 export AIDL_BIN=/path/linux_binder_idl/out/aidl
 export LINUX_BINDER_OUT_DIR=/path//linux_binder_idl/local/
 ```

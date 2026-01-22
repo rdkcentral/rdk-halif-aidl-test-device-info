@@ -26,6 +26,6 @@ This repository contains the Test Suites(`L1`) for DeviceInfo `HAL`.
 
 |SNo|Document Name|Document Description|Document Link|
 |---|-------------|--------------------|-------------|
-|1|`HAL` Specification Document|This document provides specific information on the APIs for which tests are written in this module|[HAL Interface](https://github.com/rdkcentral/rdk-halif-aidl/blob/0.12.0/README.md)|
+|1|`HAL` Specification Document|This document provides specific information on the APIs for which tests are written in this module|[HAL Interface](https://github.com/rdkcentral/rdk-halif-aidl/blob/0.13.1/README.md)|
 |2|High Level Test Specification|High Level Test Specification Documentation for the `DeviceInfo`|[deviceinfo_High-Level_TestSpecification.md](docs/pages/deviceinfo_High-Level_TestSpecification.md)||
 |3|`L1` Test procedure document|This document contains Build Instructions and `L1` Test procedure for the `Deviceinfo`|[vts_deviceinfo_L1_TestProcedure.md](docs/pages/vts_deviceinfo_L1_TestProcedure.md)|
