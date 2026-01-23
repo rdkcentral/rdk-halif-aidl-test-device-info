@@ -139,8 +139,9 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getCapabilities_pos)
             }
             else
             {
-                // Key not found in profile, log and continue
-                UT_LOG_DEBUG("Property name field not found in profile for index %d", i);
+                // Key not found in profile, fail the test
+                UT_LOG_ERROR("Property name field not found in profile for index %d", i);
+                UT_ASSERT_FALSE(true); // Fail the test
             }
         }
     }
@@ -153,7 +154,7 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getCapabilities_pos)
  * correctly set and retrieve property values for all supported properties.
  *
  * **Test Group ID:** 01@n
- * **Test Case ID:** 003@n
+ * **Test Case ID:** 002@n
  *
  * **Test Procedure:**
  * | Step | Action                                                                           | Input / Test Data                                       | Expected Result                         | Notes                                      |
@@ -217,8 +218,9 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
             }
             else
             {
-                // Key not found in profile, log and continue
-                UT_LOG_DEBUG("Property name field not found in profile for index %d", i);
+                // Key not found in profile, fail the test
+                UT_LOG_ERROR("Property name field not found in profile for index %d", i);
+                UT_ASSERT_FALSE(true); // Fail the test
             }
         }
     }
@@ -231,7 +233,7 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
  * correctly handles invalid, empty, and null property keys.
  *
  * **Test Group ID:** 01@n
- * **Test Case ID:** 004@n
+ * **Test Case ID:** 003@n
  *
  * **Test Procedure:**
  * | Step | Action                                                 | Input / Test Data                          | Expected Result           | Notes      |
