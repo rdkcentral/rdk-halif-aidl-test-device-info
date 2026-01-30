@@ -38,17 +38,20 @@ Set below environment variable:
 
 - LINUX_BINDER_OUT_DIR: Path to the Linux binder output directory (e.g., /path/to/linux_binder_idl/local).
 
-- UT_CORE_VERSION: Specific version of the UT-Core framework (e.g., 4.7.0). Defaults to the latest tagged version.
+- UT_CORE_VERSION: Specific version of the UT-Core framework (e.g., 5.0.0). Defaults to the latest tagged version.
 
-- RDK_HALIF_AIDL_VERSION: Specific version of the AIDL HAL Specification (e.g, 0.7.1). Defaults to the latest HEAD.
+- RDK_HALIF_AIDL_VERSION: Specific version of the AIDL HAL Specification (e.g, 0.13.1). Defaults to the latest HEAD.
+
+- VCOMPONENT_DEVICEINFO_VERSION : Specific version of VCOMPONENT version (e.g, develop). Defaults to main.
 
 Example:
 
 ```bash
-export UT_CORE_VERSION=4.7.0
-export RDK_HALIF_AIDL_VERSION=0.7.1
+export UT_CORE_VERSION=5.0.0
+export RDK_HALIF_AIDL_VERSION=0.13.1
 export AIDL_BIN=/path/linux_binder_idl/out/aidl
 export LINUX_BINDER_OUT_DIR=/path//linux_binder_idl/local/
+export VCOMPONENT_DEVICEINFO_VERSION=main
 ```
 
 By default, UT logs are disabled. To enable them, Set below environment variable
