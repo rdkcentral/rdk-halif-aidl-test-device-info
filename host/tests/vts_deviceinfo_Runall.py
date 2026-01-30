@@ -36,7 +36,7 @@ def Run_L1():
     test_module_name = "vts_deviceinfo_L1_tests"
     try:
         module = importlib.import_module(test_module_name)
-        test_class = getattr(module, "vts_deviceinfo_L1_tests")
+        test_class = getattr(module, test_module_name)
         test_instance = test_class(SummerLogL1)
         test_instance.run(False)
     except (ImportError, AttributeError) as e:

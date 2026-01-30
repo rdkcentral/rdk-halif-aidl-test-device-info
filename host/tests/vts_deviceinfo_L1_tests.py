@@ -77,7 +77,7 @@ class  vts_deviceinfo_L1_tests(deviceinfoHelperClass):
         """
         self.utilities.change_directory(self.hal_session, self.targetWorkspace)
 
-        if self.platform.lower() == "vDevice".lower():
+        if self.platform == "vDevice":
             # Remove deviceinfo reason file if exists on vDevice platform
             rmOutput = self.hal_session.write(f"rm {DEVICEINFO_REASON_FILE_ON_DEVICE}")
             if rmOutput is True:
@@ -101,6 +101,8 @@ class  vts_deviceinfo_L1_tests(deviceinfoHelperClass):
                 self.log.stepStart(f'Test Suit: {testsuite_name} Run all Tests cases')
                 # If 'all' test case mentioned in list, run all tests with 'r' option
                 result = self.runTest(testsuite)
+                if not result:
+                    finalresult = False
                 self.log.stepResult(result, f'Test Suit: {testsuite_name} Run all Tests cases')
             else:
                 for test_case in testsuite.get("test_cases"):
