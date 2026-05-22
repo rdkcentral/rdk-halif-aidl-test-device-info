@@ -68,11 +68,13 @@ Example:
 
 ```bash
 export UT_CORE_VERSION=5.0.0
-export RDK_HALIF_AIDL_VERSION=0.13.1
+export RDK_HALIF_AIDL_VERSION=0.15.0
 export VCOMPONENT_DEVICEINFO_VERSION=0.1.0
 export AIDL_BIN=/path/linux_binder_idl/out/aidl
 export LINUX_BINDER_OUT_DIR=/path//linux_binder_idl/local/
 ```
+#### Note:
+- This build has been compiled and reviewed against AIDL version 0.15.0.
 
 By default, UT logs are disabled. To enable them, Set below environment variable
 
