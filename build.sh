@@ -48,75 +48,57 @@ declare -r PROFILES_DIR=${TOP}/profiles
 declare -r AV_L4_TEST_DIR=${RDK_HAL_TEST_DIR}/av_l4_tests
 
 DEF_LINUX_BINDER="`realpath ${TOP}/../`/linux_binder_idl"
-# AIDL_BIN: path of aidl compiler
-AIDL_BIN=${AIDL_BIN:-${DEF_LINUX_BINDER}/out/aidl}
-# LINUX_BINDER_OUT_DIR: output installed after building linux_binder_idl
-# contains bin/servicemanager, lib/libbinder etc
+# LINUX_BINDER_OUT_DIR: installed binder libs, headers, and servicemanager
 LINUX_BINDER_OUT_DIR=${LINUX_BINDER_OUT_DIR:-${DEF_LINUX_BINDER}/local}
 
 mkdir -p $TOP_BUILD_DIR
 
-if [ ! -x $AIDL_BIN ]; then
-    echo -e "${BOLD}╔═════════════════════════════════════════════════════════════════════════════════╗${RESET}"
-    echo -e "${BOLD}  ${RED}AIDL_BIN - ${AIDL_BIN}: path does not exists. Exiting.${RESET}"
-    echo -e "${BOLD}╚═════════════════════════════════════════════════════════════════════════════════╝${RESET}"
-    exit 1
-fi
-if [ ! -d $LINUX_BINDER_OUT_DIR ]; then
-    echo -e "${BOLD}╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════╗${RESET}"
-    echo -e "${BOLD}  ${RED}LINUX_BINDER_OUT_DIR - ${LINUX_BINDER_OUT_DIR}: path does not exists. Exiting.${RESET}"
-    echo -e "${BOLD}╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════╝${RESET}"
-    exit 1
-fi
-
-declare -r AIDL_BIN=`realpath ${AIDL_BIN}`
-declare -r LINUX_BINDER_OUT_DIR=`realpath ${LINUX_BINDER_OUT_DIR}`
-
 ###############################################################################
-# Function to install linux-binder service manager, headers, and libraries
+# Function to resolve versioned src/include dirs from rdk-halif-aidl metadata
 ###############################################################################
-install_linux_binder()
-{
-    echo "Install linux-binder 'service manager, headers and libraries'"
-    install -d ${BUILD_INSTALL_PREFIX}/bin ${BUILD_INSTALL_PREFIX}/lib ${BUILD_INSTALL_PREFIX}/include
-    install -t ${BUILD_INSTALL_PREFIX}/bin ${LINUX_BINDER_OUT_DIR}/bin/*
-    install -t ${BUILD_INSTALL_PREFIX}/lib ${LINUX_BINDER_OUT_DIR}/lib/*
-    cp -apr ${LINUX_BINDER_OUT_DIR}/include/* ${BUILD_INSTALL_PREFIX}/include/
-}
-
-###############################################################################
-# Function to checkout the halif aidl repository and convert the aidl files
-# to C++ headers
-###############################################################################
-generate_hal_interfaces()
+resolve_halif_versions()
 {
     # Clone the repository if not already present
     if [ ! -d "$RDK_HAL_DIR" ]; then
-        echo "Checking out version: " $RDK_HALIF_AIDL_VERSION
+        echo "Checking out version: $RDK_HALIF_AIDL_VERSION"
         git clone -b $RDK_HALIF_AIDL_VERSION 'https://github.com/rdkcentral/rdk-halif-aidl.git' $RDK_HAL_DIR
-    fi
-
-    # Iterate through the HALIF components and generate the AIDL C++ headers
-    for component in "${!HALIF_COMPONENTS[@]}"; do
-        version=${HALIF_COMPONENTS[$component]}
-        echo "Component: $component, Version: $version"
-
-        HAL_TOP_BUILD_DIR=${TOP_BUILD_DIR}/${component}_aidl
-        AIDL_GEN_DIR="${TOP_BUILD_DIR}/$HALIF_VERSION"
-
-        cmake \
-        -DAIDL_BIN=$AIDL_BIN \
-        -DAIDL_GEN_DIR=$AIDL_GEN_DIR \
-        -DAIDL_SRC_VERSION=$version \
-        -DAIDL_TARGET=$component  \
-        -B ${HAL_TOP_BUILD_DIR} \
-        $RDK_HAL_DIR
         if [ $? -ne 0 ]; then
             echo -e "${BOLD}╔══════════════════════════════════════════════╗${RESET}"
-            echo -e "${BOLD}* ${RED}Failed to Convert AIDL files. Exiting.${RESET}"
+            echo -e "${BOLD}* ${RED}Failed to clone rdk-halif-aidl. Exiting.${RESET}"
             echo -e "${BOLD}╚══════════════════════════════════════════════╝${RESET}"
             exit 1
         fi
+    fi
+
+    for component in "${!HALIF_COMPONENTS[@]}"; do
+        local metadata="${RDK_HAL_DIR}/${component}/metadata.yaml"
+        if [ ! -f "$metadata" ]; then
+            echo -e "${BOLD}${RED}ERROR: metadata.yaml not found: ${metadata}${RESET}"
+            exit 1
+        fi
+
+        local version
+        version=$(grep -m1 '^version:' "$metadata" | awk '{print $2}')
+        if [ -z "$version" ]; then
+            echo -e "${BOLD}${RED}ERROR: Could not parse version from ${metadata}${RESET}"
+            exit 1
+        fi
+
+        local src_dir="${RDK_HAL_DIR}/${component}/${version}/src"
+        local inc_dir="${RDK_HAL_DIR}/${component}/${version}/include"
+
+        if [ ! -d "$src_dir" ]; then
+            echo -e "${BOLD}${RED}ERROR: versioned src dir not found: ${src_dir}${RESET}"
+            exit 1
+        fi
+        if [ ! -d "$inc_dir" ]; then
+            echo -e "${BOLD}${RED}ERROR: versioned include dir not found: ${inc_dir}${RESET}"
+            exit 1
+        fi
+
+        echo -e "${BOLD}${GREEN}${component}${RESET}: version=${YELLOW}${version}${RESET}"
+        HALIF_AIDL_SRC_DIR=$(realpath "$src_dir")
+        HALIF_AIDL_INC_DIR=$(realpath "$inc_dir")
     done
 }
 
@@ -126,7 +108,10 @@ generate_hal_interfaces()
 build_aidl_libs()
 {
     pushd ${AIDL_LIB_DIR}
-    make -j`nproc`
+    make -j`nproc` \
+        HALIF_AIDL_SRC_DIR="${HALIF_AIDL_SRC_DIR}" \
+        HALIF_AIDL_INC_DIR="${HALIF_AIDL_INC_DIR}" \
+        LINUX_BINDER_OUT_DIR="${LINUX_BINDER_OUT_DIR}"
     if [ $? -ne 0 ]; then
         echo -e "${BOLD}╔══════════════════════════════════════════════╗${RESET}"
         echo -e "${BOLD}* ${RED}Failed to build the AIDL Lib. Exiting.${RESET}       ${BOLD}*${RESET}"
@@ -189,7 +174,11 @@ build_vcomponent_services()
 
     git checkout ${VCOMPONENT_DEVICEINFO_VERSION}
 
-    make -j"$(nproc)" -C "${TOP}/vcomponent" BUILD_DIR="${TOP_BUILD_DIR}" UT_CORE_DIR="${UT_CORE_DIR}"
+    make -j"$(nproc)" -C "${TOP}/vcomponent" \
+        BUILD_DIR="${TOP_BUILD_DIR}" \
+        UT_CORE_DIR="${UT_CORE_DIR}" \
+        HALIF_AIDL_INC_DIR="${HALIF_AIDL_INC_DIR}" \
+        LINUX_BINDER_OUT_DIR="${LINUX_BINDER_OUT_DIR}"
     if [ $? -ne 0 ]; then
         echo -e "${BOLD}╔════════════════════════════════════════════════╗${RESET}"
         echo -e "${BOLD}* ${RED}Failed to build the vcomponent Service. Exiting.${RESET}"
@@ -206,7 +195,9 @@ build_vcomponent_services()
 build_halif_test()
 {
     # Build the tests
-    make -j`nproc` -C ${TOP}
+    make -j`nproc` -C ${TOP} \
+        HALIF_AIDL_INC_DIR="${HALIF_AIDL_INC_DIR}" \
+        LINUX_BINDER_OUT_DIR="${LINUX_BINDER_OUT_DIR}"
     if [ $? -ne 0 ]; then
         echo -e "${BOLD}╔════════════════════════════════════════════╗${RESET}"
         echo -e "${BOLD}* ${RED}Failed to build the main tests. Exiting.${RESET}"
@@ -281,7 +272,6 @@ help()
 echo -e "${BOLD}${GREEN}VTS Version            : ${RESET}${YELLOW}$(git rev-parse --abbrev-ref HEAD)${RESET}"
 echo -e "${BOLD}${GREEN}UT_CORE_VERSION        : ${RESET}${YELLOW}$UT_CORE_VERSION${RESET}"
 echo -e "${BOLD}${GREEN}RDK_HALIF_AIDL_VERSION : ${RESET}${YELLOW}$RDK_HALIF_AIDL_VERSION${RESET}"
-echo -e "${BOLD}${GREEN}AIDL_BIN               : ${RESET}${YELLOW}$AIDL_BIN${RESET}"
 echo -e "${BOLD}${GREEN}LINUX_BINDER_OUT_DIR   : ${RESET}${YELLOW}$LINUX_BINDER_OUT_DIR${RESET}"
 
 ###############################################################################
@@ -294,8 +284,7 @@ elif [ "$1" == "dist_clean" ]; then
 elif [ "$1" == "help" ]; then
     help
 elif [[ "$1" == [Tt]arget=* ]]; then
-    install_linux_binder
-    generate_hal_interfaces
+    resolve_halif_versions
     build_aidl_libs
     build_ut_core
     build_halif_test

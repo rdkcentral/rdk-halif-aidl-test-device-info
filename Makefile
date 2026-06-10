@@ -65,12 +65,17 @@ endif
 SRC_DIRS := $(DEVICEINFO_TEST_DIR)
 SRC_DIRS += $(ROOT_DIR)/test
 
-INC_DIRS := $(ROOT_DIR)/build/current/h/
-INC_DIRS += $(ROOT_DIR)/build/usr/include
+# Versioned include dir and binder out dir resolved by build.sh
+HALIF_AIDL_INC_DIR ?= $(error HALIF_AIDL_INC_DIR is not set - run via build.sh)
+LINUX_BINDER_OUT_DIR ?= $(error LINUX_BINDER_OUT_DIR is not set - run via build.sh)
+
+INC_DIRS := $(HALIF_AIDL_INC_DIR)
+INC_DIRS += $(LINUX_BINDER_OUT_DIR)/include
 INC_DIRS += $(SRC_DIRS)
 
 XLDFLAGS := -L$(ROOT_DIR)/build/usr/lib
-XLDFLAGS += -Wl,-rpath-link=$(ROOT_DIR)/build/usr/lib -Wl,--export-dynamic -Wl,-rpath,.
+XLDFLAGS += -L$(LINUX_BINDER_OUT_DIR)/lib
+XLDFLAGS += -Wl,-rpath-link=$(ROOT_DIR)/build/usr/lib -Wl,-rpath-link=$(LINUX_BINDER_OUT_DIR)/lib -Wl,--export-dynamic -Wl,-rpath,.
 XLDFLAGS += -lssl -lcrypto -lbinder -lutils
 XLDFLAGS += -laidl_client
 

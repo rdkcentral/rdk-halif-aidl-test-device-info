@@ -23,21 +23,21 @@ AIDL_LIB := lib$(AIDL_LIB_NAME).so
 
 BUILD_DIR ?= $(CURDIR)/../build
 
-AIDL_GEN_DIR ?= $(BUILD_DIR)/current
+# Versioned src/include dirs resolved from rdk-halif-aidl metadata by build.sh
+HALIF_AIDL_SRC_DIR ?= $(error HALIF_AIDL_SRC_DIR is not set - run via build.sh)
+HALIF_AIDL_INC_DIR ?= $(error HALIF_AIDL_INC_DIR is not set - run via build.sh)
+LINUX_BINDER_OUT_DIR ?= $(error LINUX_BINDER_OUT_DIR is not set - run via build.sh)
 
-AIDL_SRC_DIR := ${AIDL_GEN_DIR}/cpp/com/rdk/hal/
+# Source files from the versioned AIDL src directory
+AIDL_SRC := $(shell find $(HALIF_AIDL_SRC_DIR) -type f \( -name '*.cpp' -o -name '*.c' \))
 
-# Source files
-AIDL_SRC := $(shell find $(AIDL_SRC_DIR) -type f \( -name '*.cpp' -o -name '*.c' \))
-
-
-AIDL_LIB_INC_FLAGS := -I$(AIDL_GEN_DIR)/h
-AIDL_LIB_INC_FLAGS += -I$(BUILD_DIR)/usr/include
+AIDL_LIB_INC_FLAGS := -I$(HALIF_AIDL_INC_DIR)
+AIDL_LIB_INC_FLAGS += -I$(LINUX_BINDER_OUT_DIR)/include
 
 AIDL_LIB_LD_LIBS := -lbinder -lutils
 
-AIDL_LIB_LDFLAGS := -L$(BUILD_DIR)/usr/lib
-AIDL_LIB_LDFLAGS += -Wl,-rpath-link=$(BUILD_DIR)/usr/lib
+AIDL_LIB_LDFLAGS := -L$(LINUX_BINDER_OUT_DIR)/lib
+AIDL_LIB_LDFLAGS += -Wl,-rpath-link=$(LINUX_BINDER_OUT_DIR)/lib
 
 AIDL_LIB_CFLAGS := -Wall -Wextra -std=c++17 -ggdb
 
@@ -47,6 +47,7 @@ AIDL_LIB := $(BUILD_DIR)/usr/lib/$(AIDL_LIB)
 all: $(AIDL_LIB)
 
 $(AIDL_LIB): $(AIDL_SRC:%.cpp=%.o)
+	mkdir -p $(dir $@)
 	g++ -shared $(AIDL_LIB_LDFLAGS) $^ -o $@ $(AIDL_LIB_LD_LIBS)
 
 %.o: %.cpp
