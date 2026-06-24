@@ -62,14 +62,11 @@ Set below environment variable:
 
 - RDK_HALIF_AIDL_VERSION: Specific version of the AIDL HAL Specification (e.g, 0.7.1). Defaults to the latest HEAD.
 
-- VCOMPONENT_DEVICEINFO_VERSION: Specific version of the deviceinfo vcomponent module (e.g, 0.1.0). Defaults to main branch.
-
 Example:
 
 ```bash
 export UT_CORE_VERSION=5.0.0
 export RDK_HALIF_AIDL_VERSION=0.15.0
-export VCOMPONENT_DEVICEINFO_VERSION=0.1.0
 export AIDL_BIN=/path/linux_binder_idl/out/aidl
 export LINUX_BINDER_OUT_DIR=/path//linux_binder_idl/local/
 ```
@@ -204,7 +201,6 @@ deviceConfig:
         model:      "VTV"
         soc_vendor: "appleM3"
         target_directory: "/tmp/"
-        deviceinfo_process_name: "Vendor-DeviceInfo"
         prompt: "~#" # Prompt string on console
         wait_time: 20 #Configurable timeout value to limit the total duration of individual tests
         test:
