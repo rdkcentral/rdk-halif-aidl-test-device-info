@@ -17,34 +17,6 @@
 # limitations under the License.
 
 RUN_DIR=$(realpath "$(dirname "$0")")
-VCOMPONENT_SERVICE_NAME=Vendor-DeviceInfo
-VCOMPONENT_CONFIG_PATH=${RUN_DIR}/vcomponent_configurations/deviceinfo_vcomponent_configuration.yaml
-VCOMPONENT_PORT=8075
-# Function to check if a process is running
-check_process()
-{
-    local process_name=$1
-    pgrep -f "$process_name" > /dev/null
-    return $?
-}
-
-start_vcomponent_service()
-{
-    echo "Starting ${VCOMPONENT_SERVICE_NAME} with config: ${VCOMPONENT_CONFIG_PATH}"
-    ${RUN_DIR}/$VCOMPONENT_SERVICE_NAME -c "${VCOMPONENT_CONFIG_PATH}" -p "${VCOMPONENT_PORT}" &
-    vcomponentservice_pid=$!
-    # Wait for service to be ready
-    sleep 1
-
-    export VCOMPONENT_SERVICE_PID=$vcomponentservice_pid
-    echo "${VCOMPONENT_SERVICE_NAME} started with PID: $vcomponentservice_pid"
-}
-
-if check_process $VCOMPONENT_SERVICE_NAME; then
-    echo "${VCOMPONENT_SERVICE_NAME} is already running"
-else
-    start_vcomponent_service
-fi
-
+export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./:./lib/.:$RUN_DIR:$RUN_DIR/lib:$LD_LIBRARY_PATH
 echo "Executing [vts_deviceinfo_hal_test]"
 "${RUN_DIR}/vts_deviceinfo_hal_test" "$@"

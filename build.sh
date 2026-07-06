@@ -566,7 +566,6 @@ install_test()
 
     # Test binary and scripts
     install -t ${INSTALL_PATH} ${TOP_BUILD_DIR}/usr/bin/*
-    install -t ${INSTALL_PATH} ${TOP_BUILD_DIR}/bin/Vendor-DeviceInfo
     install -t ${INSTALL_PATH} run.sh
 
     # Libraries
