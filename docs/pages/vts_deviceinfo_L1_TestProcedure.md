@@ -22,25 +22,7 @@
 
 ## Build the VTS
 
-### 1. Build linux binder
-
-The test suite depends on the Linux binder with `AIDL` support. Follow these steps to build it:
-
-For detail build instruction, please refer to [Linux Binder](https://github.com/rdkcentral/linux_binder_idl/tree/main)
-
-Here are the simplest steps outlined:
-
-```bash
-git clone -b develop 'https://github.com/rdkcentral/linux_binder_idl.git'
-
-cd linux_binder_idl
-
-sc docker run rdk-kirkstone /bin/bash //preferred
-
-./build-linux-binder-aidl.sh 64
-```
-
-### 2. Build this test
+### 1. Build this test
 
 Clone and build the test suite:
 
@@ -52,51 +34,76 @@ git clone git@github.com:rdkcentral/rdk-halif-aidl-test-device-info.git
 cd rdk-halif-aidl-test-device-info
 ```
 
-Set below environment variable:
-
-- AIDL_BIN: Path to the `AIDL` compiler (e.g., /path/to/linux_binder_idl/out/aidl).
-
-- LINUX_BINDER_OUT_DIR: Path to the Linux binder output directory (e.g., /path/to/linux_binder_idl/local).
-
-- UT_CORE_VERSION: Specific version of the UT-Core framework (e.g., 4.7.0). Defaults to the latest tagged version.
-
-- RDK_HALIF_AIDL_VERSION: Specific version of the AIDL HAL Specification (e.g, 0.7.1). Defaults to the latest HEAD.
-
-- VCOMPONENT_DEVICEINFO_VERSION: Specific version of the deviceinfo vcomponent module (e.g, 0.1.0). Defaults to main branch.
-
-Example:
-
-```bash
-export UT_CORE_VERSION=5.0.0
-export RDK_HALIF_AIDL_VERSION=0.15.0
-export VCOMPONENT_DEVICEINFO_VERSION=0.1.0
-export AIDL_BIN=/path/linux_binder_idl/out/aidl
-export LINUX_BINDER_OUT_DIR=/path//linux_binder_idl/local/
-```
-#### Note:
-- This build has been compiled and reviewed against AIDL version 0.15.0.
-
-By default, UT logs are disabled. To enable them, Set below environment variable
-
-```bash
-export ENABLE_UT_INFO_LOGGING=1
-```
-
-Run the build script:
+Run the build script (specify `Target=linux` for x86-64 or `Target=arm` for ARM cross-compile):
 
 ```bash
 ./build.sh Target=linux
 ```
 
-The build.sh script:
+```bash
+./build.sh Target=arm
+```
 
-- Clones the `rdk-halif-aidl` repository and UT-Core framework.
+To enable verbose UT logging, optionally set before running:
 
-- Compiles the test suite.
+```bash
+export UT_LOG_LEVEL=4
+./build.sh Target=linux
+```
 
-- Generates binaries in the `build/bin` directory.
+#### Optional Environment Variables
 
-- Also generates `vts-deviceinfo.tar.gz` tar ball in `build/bin` folder
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RDK_HALIF_AIDL_VERSION` | `main` | Branch or tag of `rdk-halif-aidl` to clone/checkout |
+| `UT_CORE_VERSION` | `5.1.0` | Version tag of `ut-core` to build against |
+| `UT_LOG_LEVEL` | *(unset)* | Set to `4` to enable verbose UT logging |
+| `BINDER_SDK_DIR` | *(auto-detected)* | ARM builds only: path to a pre-built ARM Binder SDK. If unset and `OECORE_TARGET_SYSROOT` is set, the OE sysroot binder is used; otherwise the ARM binder is cross-compiled from source |
+
+Example – build against a specific halif branch with a custom ut-core version:
+
+```bash
+export RDK_HALIF_AIDL_VERSION=develop
+export UT_CORE_VERSION=5.1.0
+export UT_LOG_LEVEL=4
+./build.sh Target=linux
+```
+
+#### What `build.sh` does
+
+- Clones (or switches) the `rdk-halif-aidl` repository to `RDK_HALIF_AIDL_VERSION`.
+- Builds (or reuses) the Binder SDK via `rdk-halif-aidl/build_binder.sh` (Linux) or cross-compiles for ARM.
+- Compiles the `deviceinfo` AIDL interface library at the version pinned in `rdk-halif-aidl/versions_released.yaml` and stages headers into `rdk-halif-aidl/out/`.
+- Generates `rdk-halif-aidl/out/halif_generated.mk` with exact include and library paths for the compiler.
+- Clones and builds the UT-Core framework at `UT_CORE_VERSION`.
+- Compiles the test binary (`vts_deviceinfo_hal_test`).
+- Assembles all runtime artifacts into `build/bin/` and packages them as `build/bin/vts-deviceinfo.tar.gz`.
+
+#### Utility targets
+
+```bash
+./build.sh clean        # Remove compiled objects and the output tarball
+./build.sh dist_clean   # Remove all build artefacts and cloned dependencies
+./build.sh help         # Print usage information
+```
+
+The tarball contains:
+
+```
+vts_deviceinfo_hal_test          # main test binary
+Vendor-DeviceInfo                # vcomponent service
+run.sh                           # test runner
+deviceInfo_populate_controlPlane.sh
+profiles/
+vcomponent_configurations/
+lib/
+  libdeviceinfo-v<version>-cpp.so  # versioned HAL interface library (snapshot build)
+  libdeviceinfo-cpp.so             # stable unversioned symlink
+  libstdc++.so.6                   # host libstdc++ (Linux builds only)
+  libut_control.so                 # ut-core control library
+```
+
+> **Note:** Binder runtime libraries (`libbinder.so`, `libutils.so`, `libbase.so`, `libcutils.so`, `liblog.so`) and `servicemanager` are **not** bundled. The target device's system binder must be compatible with its kernel binder driver, so the build strips these files and relies on the target's own binder installation.
 
 ## Run L1 tests without python
 
