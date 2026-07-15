@@ -91,15 +91,13 @@ The tarball contains:
 
 ```
 vts_deviceinfo_hal_test          # main test binary
-Vendor-DeviceInfo                # vcomponent service
 run.sh                           # test runner
-deviceInfo_populate_controlPlane.sh
 profiles/
-vcomponent_configurations/
 lib/
   libdeviceinfo-v<version>-cpp.so  # versioned HAL interface library (snapshot build)
-  libdeviceinfo-cpp.so             # stable unversioned symlink
-  libstdc++.so.6                   # host libstdc++ (Linux builds only)
+  libdeviceinfo-cpp_vts.so         # unversioned VTS symlink
+  libstdc++.so.6.0.30              # host libstdc++ (Linux builds only)
+  libstdc++.so.6                   # host libstdc++ soname symlink (Linux builds only)
   libut_control.so                 # ut-core control library
 ```
 

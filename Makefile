@@ -72,7 +72,7 @@ SRC_DIRS += $(ROOT_DIR)/test
 #   out/target/lib/halif/lib<module>-v<version>-cpp.so  (versioned .so)
 #   out/build/include/<module>/<version>/include/        (staged headers)
 # build.sh create_halif_softlinks() adds:
-#   out/target/lib/halif/lib<module>-cpp.so -> lib<module>-v<version>-cpp.so
+#   out/target/lib/halif/lib<module>-cpp_vts.so -> lib<module>-v<version>-cpp.so
 # and writes halif_generated.mk with HALIF_INC_DIRS and HALIF_MODULE_LIBS set
 # to the exact paths captured at that moment — avoiding wildcard/find at make
 # parse time, which silently returns empty on a clean tree.
@@ -125,7 +125,7 @@ export CXXFLAGS
 all: $(TARGET_EXEC)
 
 check-halif-built:
-	@[ -n "$(HALIF_INC_DIRS)" ] || { \
+	@[ -n "$(HALIF_INC_DIRS)" ] && [ -n "$(HALIF_MODULE_LIBS)" ] || { \
 		echo "ERROR: HAL interfaces not built."; \
 		echo "       Run: ./build.sh Target=$(TARGET)"; \
 		exit 1; \
