@@ -17,6 +17,6 @@
 # limitations under the License.
 
 RUN_DIR=$(realpath "$(dirname "$0")")
-export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./:$RUN_DIR:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/lib:/lib:/home/root:./:./lib:$RUN_DIR:$RUN_DIR/lib:$LD_LIBRARY_PATH
 echo "Executing [vts_deviceinfo_hal_test]"
 "${RUN_DIR}/vts_deviceinfo_hal_test" "$@"
