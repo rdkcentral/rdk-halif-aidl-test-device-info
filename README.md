@@ -15,6 +15,8 @@
 - `L2` - Module functional Testing
 - `L3` - Module testing with External Stimulus is required to validate and control device
 - `API` - Application Programming Interface
+- `AIDL` - Android Interface Definition Language
+- `VTS` - Vendor Test Suite
 - `High-Level Test Specification` : This document provides a high-level view of test cases covered as part of `L2` and `L3` testing, focusing on major use cases, system behaviour, and overall test coverage.
 - `Low-Level Test Specification` : This document provides technical details of how the tests are implemented, including specific test cases with inputs, expected outputs, pass/fail criteria, and implementation specifics for individual functionalities, modules, or APIs.
 
@@ -26,6 +28,6 @@ This repository contains the Test Suites(`L1`) for DeviceInfo `HAL`.
 
 |SNo|Document Name|Document Description|Document Link|
 |---|-------------|--------------------|-------------|
-|1|`HAL` Specification Document|This document provides specific information on the APIs for which tests are written in this module|[HAL Interface](https://github.com/rdkcentral/rdk-halif-aidl/blob/0.15.0/README.md)|
+|1|`HAL` Specification Document|This document provides specific information on the APIs for which tests are written in this module|[HAL Interface](https://github.com/rdkcentral/rdk-halif-aidl/blob/main/deviceinfo/current/com/rdk/hal/deviceinfo/IDeviceInfo.aidl)|
 |2|High Level Test Specification|High Level Test Specification Documentation for the `DeviceInfo`|[deviceinfo_High-Level_TestSpecification.md](docs/pages/deviceinfo_High-Level_TestSpecification.md)||
 |3|`L1` Test procedure document|This document contains Build Instructions and `L1` Test procedure for the `Deviceinfo`|[vts_deviceinfo_L1_TestProcedure.md](docs/pages/vts_deviceinfo_L1_TestProcedure.md)|
