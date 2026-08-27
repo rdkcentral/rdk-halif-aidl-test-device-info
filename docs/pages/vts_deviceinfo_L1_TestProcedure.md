@@ -131,7 +131,7 @@ cd deviceinfo
 Run below command to execute the VTS Test:
 
 ```bash
-./run.sh -p profiles/hfp-deviceinfo-vcomponent.yaml
+./run.sh -p profiles/hfp-deviceinfo.yaml
 ```
 
 ## Run Tests in Python Environment
@@ -212,7 +212,7 @@ deviceConfig:
         prompt: "~#" # Prompt string on console
         wait_time: 20 #Configurable timeout value to limit the total duration of individual tests
         test:
-            profile: "../../profiles/hfp-deviceinfo-vcomponent.yaml" #HFP profile used to meet platform requirements
+            profile: "../../profiles/hfp-deviceinfo.yaml" #HFP profile used to meet platform requirements
             controller_port: 8075 #Port where the ut-controller is listening
 ```
 
