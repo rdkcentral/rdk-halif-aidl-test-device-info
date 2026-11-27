@@ -100,7 +100,7 @@ using com::rdk::hal::deviceinfo::PropertyType;
     do                                                                                                \
     {                                                                                                 \
         ::android::binder::Status status;                                                             \
-        UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", android::String8(propertyKey).string()); \
+        UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", propertyKey.c_str()); \
         status = (deviceinfoHandle)->getProperty(propertyKey, &propertyVal); \
         UT_LOG_DEBUG("Result getProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
         UT_ASSERT_TRUE(status.isOk()); \
@@ -116,7 +116,7 @@ using com::rdk::hal::deviceinfo::PropertyType;
     do                                                                                                \
     {                                                                                                 \
         ::android::binder::Status status;                                                             \
-        UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", key ? android::String8(key).string() : "null"); \
+        UT_LOG_DEBUG("Calling getProperty(IN:key[%s], OUT:value[])", key.c_str()); \
         status = (deviceinfoHandle)->getProperty(key, &value); \
         UT_LOG_DEBUG("Result getProperty(OUT:value), status:[isok:%d, exception:%d]", status.isOk(), status.exceptionCode()); \
         UT_ASSERT_TRUE(status.isOk()); \

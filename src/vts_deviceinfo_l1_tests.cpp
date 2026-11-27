@@ -199,7 +199,7 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_pos)
                     key = baseKey + "." + std::to_string(i) + "." + "value";
                     if (ut_kvp_getStringField(ut_kvp_profile_getInstance(), key.c_str(), returnedString, sizeof(returnedString)) == UT_KVP_STATUS_SUCCESS)
                     {
-                        UT_ASSERT_STRING_EQUAL(android::String8(propertyVal->key).string(), returnedString); // Value matches
+                        UT_ASSERT_STRING_EQUAL(propertyVal->key.c_str(), returnedString); // Value matches
                     }
 
                     key = baseKey + "." + std::to_string(i) + "." + "format";
@@ -252,19 +252,19 @@ UT_ADD_TEST(VTS_L1_DEVICEINFO, getProperty_neg)
 
     // Testing with an invalid property key
     std::optional<com::rdk::hal::deviceinfo::Property> propertyVal = std::nullopt;
-    android::String16 key("KEY_INVALID");
+    std::string key("KEY_INVALID");
     DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceInfo, key, propertyVal);
     UT_ASSERT_FALSE(propertyVal.has_value());
 
     // Testing with an empty property key
     propertyVal = std::nullopt;
-    key = android::String16("");
+    key = "";
     DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceInfo, key, propertyVal);
     UT_ASSERT_FALSE(propertyVal.has_value());
 
     // Testing with a null property key
     propertyVal = std::nullopt;
-    key = android::String16(); // This creates an empty String16, simulating a null key
+    key = std::string(); // A non-nullable AIDL string represents a missing key as empty.
     DEVICEINFO_GET_PROPERTY_NEGATIVE(deviceInfo, key, propertyVal);
     UT_ASSERT_FALSE(propertyVal.has_value());
 
